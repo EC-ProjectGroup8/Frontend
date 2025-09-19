@@ -1,0 +1,15 @@
+.example-element {
+  color: red;
+  font-size: 10px;
+  margin: 5px;
+  padding: 5px;
+}
+
+.custom-button-example {
+  background-color: blue;
+  color: white;
+  border-radius: 5px;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+}
