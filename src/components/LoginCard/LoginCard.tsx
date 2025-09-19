@@ -1,3 +1,7 @@
+// If you prefer to have CSS just for this component, 
+// you can import it here
+import "./LoginCard.css";
+
 // Example of a login card component
 function LoginCard() {
   return (

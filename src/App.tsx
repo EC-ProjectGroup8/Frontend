@@ -1,13 +1,17 @@
-import { Button } from "@/components/ui/button"
+import BaseLayout from "@/layouts/BaseLayout";
+import FormRegistration from "@/pages/FormRegistration";
+import UserLogin from "@/pages/UserLogin";
+import { Routes, Route } from "react-router-dom";
 
 function App() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <Button variant="myButton" size={"lg"} className="example-element">Click me</Button>
-    </div>
-
-
-  )
+    <Routes>
+      <Route path="/" element={<BaseLayout />}>
+        <Route index element={<UserLogin />} />
+        <Route path="/register" element={<FormRegistration />} />
+      </Route>
+    </Routes>
+  );
 }
 
-export default App
+export default App;
