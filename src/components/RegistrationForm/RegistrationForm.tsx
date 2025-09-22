@@ -54,7 +54,7 @@ const RegistrationForm: React.FC = () => {
             {/* IMAGE SECTION */}
             <div className="image-section">
                <img
-                  src="/public/images/register-image.png"
+                  src="/images/register-image.png"
                   alt="Gym workout"
                   className="image"
                />
