@@ -57,6 +57,8 @@
   @media (width >=768px) {
     flex-direction: column;
     gap: 3rem;
+    height: 100%;
+    align-items: flex-start;
     .page-indicator {
       display: none;
     }
@@ -122,3 +124,55 @@ footer {
     }
   }
 }
+
+.logout-btn {
+  background-color: var(--clr-link);
+  color: var(--clr-text-invert);
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  width: 100%;              
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+}
+
+@media (width < 1400px) {
+  .logout-btn {
+    display: none;
+  }
+}
+
+.logout-btn:hover {
+  background-color: var(--clr-link-hover);
+}
+
+.spacer {
+  margin-top: auto;
+}
+
+
+/* Endast Test, tas bort senare*/
+.nav-link {
+  color: var(--clr-link);
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.5rem 0;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--clr-link-hover);
+}
+
+@media (width < 1400px) {
+.nav-link {
+  display: none;
+  } 
+}
+

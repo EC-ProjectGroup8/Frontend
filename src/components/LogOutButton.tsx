@@ -1,6 +1,9 @@
 const LogOutButton = () => {
   return (
-    <div>LogOutButton</div>
+
+    <button className="logout-btn w-full">
+     <span>Logout</span>
+    </button>
   )
 }
 
