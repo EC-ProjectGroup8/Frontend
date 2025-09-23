@@ -48,10 +48,10 @@
 .navbar {
   grid-area: nav;
   display: flex;
-  flex-direction: row;          
+  flex-direction: row;
   align-items: center;
-  justify-content: space-between; 
-  padding: 1rem;                 
+  justify-content: space-between;
+  padding: 1rem;
   gap: 1rem;
   width: 100%;
   border-radius: 1rem;
@@ -59,14 +59,13 @@
   height: auto;
 }
 
-
 @media (width >= 768px) {
   .navbar {
     flex-direction: column;
     align-items: flex-start;
     gap: 3rem;
     padding: 1.5rem;
-    height: 100%; 
+    height: 100%;
   }
 
   .navbar .page-indicator {
@@ -74,11 +73,10 @@
   }
 }
 
-
 header {
   display: none;
   grid-area: header;
-  justify-content: end;
+  justify-content: start;
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 1px 2px 4px rgba(73, 71, 73, 0.07);
@@ -135,32 +133,37 @@ footer {
   }
 }
 
-.logout-btn {
-  margin-top: auto;
+.primary-button {
   background-color: var(--clr-link);
   color: var(--clr-text-invert);
-  padding: 0.75rem 1rem;
   border: none;
   border-radius: 0.5rem;
-  width: 100%;              
   cursor: pointer;
   display: flex;
   align-items: center;
+  padding: 0.75rem 1rem;
   justify-content: center;
-  gap: 0.5rem;
   font-size: 1rem;
   font-weight: 500;
   transition: background-color 0.2s ease-in-out;
+  box-shadow: 1px 2px 6px rgba(73, 71, 73, 0.014);
 }
-
-@media (width < 1400px) {
-  .logout-btn {
+  
+.logout-btn {
+  margin-top: auto;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  gap: 0.5rem;
+  @media (width < 1400px) {
     display: none;
+  }
+
+  .logout-btn:hover {
+    background-color: var(--clr-link-hover);
   }
 }
 
-.logout-btn:hover {
-  background-color: var(--clr-link-hover);
+.book-btn {
 }
 
 /* Only for testing responsive functionality*/
@@ -177,8 +180,13 @@ footer {
 }
 
 @media (width < 1400px) {
-.nav-link {
-  display: none;
-  } 
+  .nav-link {
+    display: none;
+  }
 }
 
+.page-indicator {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--clr-primary-600);
+}
