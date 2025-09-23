@@ -4,17 +4,14 @@ import LogOutButton from "./LogOutButton";
 
 const Navbar = () => {
   return (
-    <nav className="navbar">
+   <nav className="navbar">
       <Logo />
 
-      {/* Endast test, länkarna tas bort senare */}
-      <a href="/workouts" className="nav-link cursor-pointer">Home</a>
-      <a href="/workouts" className="nav-link cursor-pointer">My booked Workouts</a>
-      <a href="/workouts" className="nav-link cursor-pointer">Settings</a>
-
-      
+      {/*Links are for testing responsive functionality only*/}
+      <a href="/workouts" className="nav-link">Home</a>
+      <a href="/workouts" className="nav-link">My booked Workouts</a>
+      <a href="/workouts" className="nav-link">Settings</a>
       <CurrentPage />
-      <div className="spacer" />
       <LogOutButton />
     </nav>
   );
