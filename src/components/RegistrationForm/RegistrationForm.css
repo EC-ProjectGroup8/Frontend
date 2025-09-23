@@ -11,14 +11,14 @@
    flex-direction: column;
    width: 100%;
    max-width: 1000px;
-   max-height: 800px;
    overflow: hidden;
    border: 1px solid var(--clr-border);
    border-radius: 1rem;
    background-color: var(--clr-bg-card);
-
+   
    @media (min-width: 768px) {
       flex-direction: row;      
+      max-height: 800px;
    }
 }
 
