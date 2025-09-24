@@ -5,53 +5,87 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import "../css/sign-in-up-form.css";
 import Logo from "./Logo";
+import { useFetch, HttpError } from "@/hooks/useFetch";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import Toast from "@/components/Toast/Toast";
 
-type FormData = {
-  firstName: string;
-  lastName: string;
+type SignInForm = {
   email: string;
   password: string;
-  confirmPassword: string;
 };
 
+const API_AUTH_SIGNIN =
+  "https://authservice8-fvgjaehwh5f8d9dq.swedencentral-01.azurewebsites.net/api/Auth/signin";
+
 const LoginCard: React.FC = () => {
+  const { post } = useFetch<unknown>(API_AUTH_SIGNIN, { method: "POST" });
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     setError,
-    getValues,
-  } = useForm<FormData>({
+  } = useForm<SignInForm>({
     mode: "onSubmit",
     reValidateMode: "onChange",
-    shouldFocusError: true,
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  const onSubmit = async (formData: SignInForm) => {
+    try {
+      const payload = {
+        Email: formData.email.trim(),
+        Password: formData.password,
+      };
 
-  const onSubmit = async (formData: FormData) => {
-    const email = formData.email.trim().toLowerCase();
+      const res = await post<string | { email: string }>(payload);
 
-    const takenEmails = ["taken@example.com"];
-    if (takenEmails.includes(email)) {
-      setError("email", { message: "Email already in use" });
-      return;
+      const email =
+        typeof res === "string"
+          ? res
+          : res && typeof res === "object"
+          ? (res as { email?: string }).email
+          : undefined;
+
+      if (!email) throw new Error("Unexpected sign-in response.");
+
+      sessionStorage.setItem("loggedInUserEmail", email);
+      toast.success("Signed in successfully!");
+      navigate("/workouts");
+    } catch (err: unknown) {
+      console.error("Sign-in error:", err);
+
+      if (err instanceof HttpError) {
+        if (err.status === 400 || err.status === 401) {
+          setError("password", { message: "Invalid email or password." });
+          toast.error("Invalid email or password.");
+          return;
+        }
+        if (err.status >= 500) {
+          toast.error("Server error (500). Please try again later.");
+          return;
+        }
+
+        toast.error(`Request failed (${err.status}). Please try again later.`);
+        return;
+      }
+
+      const msg =
+        err instanceof Error && err.message && err.message !== "Failed to fetch"
+          ? err.message
+          : "Network error. Please check your connection or try again later.";
+      toast.error(msg);
     }
-
-    // TEMP: simulate network latency
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   };
 
   return (
     <div className="registration-container">
       <div className="registration-frame">
+        {/* Toast */}
+        <Toast />
+
         {/* IMAGE SECTION */}
         <div className="image-section">
           <img
@@ -76,6 +110,7 @@ const LoginCard: React.FC = () => {
             <h2>Welcome back</h2>
             <p>Enter your credentials to access your account</p>
           </div>
+
           <form
             className="form"
             onSubmit={handleSubmit(onSubmit)}
@@ -83,7 +118,7 @@ const LoginCard: React.FC = () => {
             aria-busy={isSubmitting}
           >
             <span className="sr-only" role="status" aria-live="polite">
-              {isSubmitting ? "Submitting your registration..." : ""}
+              {isSubmitting ? "Authorizing..." : ""}
             </span>
 
             {/* Email */}
@@ -128,14 +163,11 @@ const LoginCard: React.FC = () => {
                 className="form-input"
                 placeholder="*********"
                 type="password"
-                autoComplete="new-password"
+                autoComplete="current-password"
                 aria-invalid={!!errors.password}
                 {...register("password", {
                   required: "Password is required",
                   minLength: { value: 8, message: "Min 8 characters" },
-                  validate: (v) =>
-                    passwordRegex.test(v) ||
-                    "Need one uppercase, one lowercase and one digit",
                 })}
               />
               {errors.password && (

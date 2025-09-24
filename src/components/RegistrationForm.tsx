@@ -9,28 +9,14 @@ import "../css/sign-in-up-form.css";
 import { toast } from "sonner";
 import Toast from "@/components/Toast/Toast";
 import type { RegistrationFormData } from "@/types/authTypes";
-import { useFetch } from "@/hooks/useFetch";
+import { useFetch, HttpError } from "@/hooks/useFetch";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 
-// Setting API Endpoint
-const API_AUTH_ENDPOINT = "http://localhost:3000/User";
+const API_AUTH_ENDPOINT =
+  "https://authservice8-fvgjaehwh5f8d9dq.swedencentral-01.azurewebsites.net/api/Auth/register";
 
 const RegistrationForm: React.FC = () => {
-  // useFetch is an React Hook, we are calling it on top level
-  // Get user data for email validation
-  const {
-    data: existingUserData,
-    error: fetchError,
-    refetch: refetchExistingUserData,
-  } = useFetch<RegistrationFormData[]>(API_AUTH_ENDPOINT);
-
-  // Post user data to API
-  const { post, error: postError } = useFetch<RegistrationFormData>(
-    API_AUTH_ENDPOINT,
-    {
-      method: "POST",
-    }
-  );
+  const { post } = useFetch<unknown>(API_AUTH_ENDPOINT, { method: "POST" });
 
   const {
     register,
@@ -38,6 +24,7 @@ const RegistrationForm: React.FC = () => {
     formState: { errors, isSubmitting },
     setError,
     getValues,
+    reset,
   } = useForm<RegistrationFormData>({
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -52,51 +39,34 @@ const RegistrationForm: React.FC = () => {
     },
   });
 
-  // Regex and dummy data
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-  // Submit-funktion (fake API-call)
   const onSubmit = async (formData: RegistrationFormData) => {
-    // Best practise using Try catch regarding Async tasks
     try {
-      // ---- Some validation before post --- //
-      // Check if existingUserData is available and no fetch error
-      if (fetchError || !existingUserData) {
-        toast.error("Failed to fetch existing user data");
-        return;
-      }
+      const payload = {
+        FirstName: formData.FirstName.trim(),
+        LastName: formData.LastName.trim(),
+        Email: formData.Email.trim(),
+        Password: formData.Password,
+        ConfirmPassword: formData.confirmPassword, 
+      };
 
-      // Check if email already exists
-      const emailExists = existingUserData.some(
-        (item: RegistrationFormData) =>
-          item.Email.toLowerCase() === formData.Email.trim().toLowerCase()
-      );
+      await post(payload);
 
-      // If email exists, set error and return
-      if (emailExists) {
-        setError("Email", { message: "This email is already registered." });
-        toast.error("Registration failed: Email is already in use.");
-        return;
-      }
-
-      // If post error, set error and return
-      if (postError) {
-        toast.error("Registration failed: " + postError);
-        return;
-      }
-      // ---- Some validation before post --- END //
-
-      // Post user data to API
-      await post(formData);
-      // Refetch existing user data
       toast.success("Registration successful!");
-      // Reset form and update existing user data, to avoid Stale
-      // data
-      refetchExistingUserData();
-    } catch (postError) {
-      toast.error(
-        (postError as string) || "Something went wrong. Please try again later."
-      );
+      reset(); 
+    } catch (err: unknown) {
+
+      if (err instanceof HttpError && err.status === 409) {
+        setError("Email", { message: "This email is already registered." });
+        toast.error("Email is already in use.");
+        return;
+      }
+
+
+      const message =
+        err instanceof Error ? err.message : "Registration failed. Please try again.";
+      toast.error(message);
     }
   };
 
@@ -135,7 +105,7 @@ const RegistrationForm: React.FC = () => {
             Create your account to unlock your fitness journey.
           </p>
 
-          {/* Screen-reader for submitting */}
+          {/* Screen-reader för submit-status */}
           <span className="sr-only" role="status" aria-live="polite">
             {isSubmitting ? "Submitting your registration..." : ""}
           </span>
@@ -281,33 +251,6 @@ const RegistrationForm: React.FC = () => {
               </p>
             )}
           </div>
-
-          {/* NO TERMS YET */}
-          {/* Terms */}
-          {/* <div className="form-group form-legal">
-            <div className="checkbox-container">
-            <input
-               id="acceptTerms"
-               type="checkbox"
-               className="checkbox-input"
-               aria-invalid={!!errors.acceptTerms}
-               {...register("acceptTerms", {
-               validate: v => v === true || "You must accept the terms",
-               })}
-            />
-
-            <label htmlFor="acceptTerms" className="checkbox-label text-sm">
-               By clicking Register, you agree to our{" "}
-               <a className="checkbox-link underline" href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
-               {" "}and{" "}
-               <a className="checkbox-link underline" href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
-            </label>
-            </div>
-
-            {errors.acceptTerms && (
-            <p className="form-error text-sm" aria-live="polite">{errors.acceptTerms.message}</p>
-            )}
-        </div> */}
 
           {/* Submit */}
           <Button type="submit" className="form-button" disabled={isSubmitting}>

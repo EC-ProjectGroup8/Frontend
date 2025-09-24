@@ -1,12 +1,26 @@
 import * as React from "react";
 
+export class HttpError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+    public bodyText?: string
+  ) {
+    super(message);
+    this.name = "HttpError";
+  }
+}
+
 export function useFetch<T>(url: string, init?: RequestInit) {
   const [data, setData] = React.useState<T | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string>("");
 
   const fetchData = React.useCallback(
-    async (options?: RequestInit, signal?: AbortSignal) => {
+    async <R = T>(
+      options?: RequestInit,
+      signal?: AbortSignal
+    ): Promise<R | null> => {
       setLoading(true);
       setError("");
 
@@ -14,7 +28,6 @@ export function useFetch<T>(url: string, init?: RequestInit) {
         const res = await fetch(url, {
           ...(init || {}),
           ...(options || {}),
-
           signal,
           headers: {
             Accept: "application/json",
@@ -28,18 +41,30 @@ export function useFetch<T>(url: string, init?: RequestInit) {
           const message = text?.trim()
             ? `${res.status} ${res.statusText} – ${text}`
             : `${res.status} ${res.statusText}`;
-          throw new Error(message);
+          setError(message);
+          setData(null);
+          throw new HttpError(res.status, message, text);
         }
 
-        // Handle 204 No Content gracefully
         if (res.status === 204) {
           setData(null);
+          return null;
+        }
+
+        const ct = res.headers.get("content-type") || "";
+        if (ct.includes("application/json")) {
+          const json = (await res.json()) as R;
+          setData(json as unknown as T);
+          return json;
         } else {
-          const json = (await res.json()) as T;
-          setData(json);
+          const text = (await res.text()) as unknown as R;
+          setData(text as unknown as T);
+          return text;
         }
       } catch (err: unknown) {
-        if (err instanceof DOMException && err.name === "AbortError") return;
+        if (err instanceof DOMException && err.name === "AbortError") {
+          return null;
+        }
 
         const msg =
           err instanceof Error
@@ -50,10 +75,8 @@ export function useFetch<T>(url: string, init?: RequestInit) {
 
         setError(msg);
         setData(null);
+        throw err instanceof Error ? err : new Error(msg);
       } finally {
-        // Only update loading state if the request was NOT aborted.
-        // When StrictMode unmounts/remounts a component the signal will be aborted —
-        // in that case we don't want to flip loading to false (it will be retried on remount).
         if (!signal || !signal.aborted) {
           setLoading(false);
         }
@@ -64,35 +87,34 @@ export function useFetch<T>(url: string, init?: RequestInit) {
 
   React.useEffect(() => {
     const controller = new AbortController();
-    // Only fetch on mount if it's a GET request
     if (!init?.method || init.method.toUpperCase() === "GET") {
-      fetchData(init, controller.signal);
+      fetchData(init, controller.signal).catch(() => {});
     } else {
       setLoading(false);
     }
     return () => controller.abort();
   }, [fetchData, init]);
 
-  // Manual refetch
-  // Manual refetch
   const refetch = React.useCallback(() => {
     const controller = new AbortController();
-    fetchData(init, controller.signal);
+    fetchData(init, controller.signal).catch(() => {});
     return () => controller.abort();
   }, [fetchData, init]);
 
-  // Manual POST request
   const post = React.useCallback(
-    async (body: unknown) => {
+    async <R = T>(body: unknown) => {
       const controller = new AbortController();
       const postInit: RequestInit = {
         ...(init || {}),
         method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          ...(init?.headers || {}),
+        },
         body: JSON.stringify(body),
       };
-      fetchData(postInit, controller.signal);
-      // Wait for the request to complete before returning, returning data 
-      return await fetchData(postInit, controller.signal);
+      return await fetchData<R>(postInit, controller.signal);
     },
     [fetchData, init]
   );
