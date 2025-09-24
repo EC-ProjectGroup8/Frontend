@@ -11,12 +11,15 @@ import Toast from "@/components/Toast/Toast";
 import type { RegistrationFormData } from "@/types/authTypes";
 import { useFetch, HttpError } from "@/hooks/useFetch";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
+import { useNavigate } from "react-router-dom";
 
 const API_AUTH_ENDPOINT =
   "https://authservice8-fvgjaehwh5f8d9dq.swedencentral-01.azurewebsites.net/api/Auth/register";
 
 const RegistrationForm: React.FC = () => {
   const { post } = useFetch<unknown>(API_AUTH_ENDPOINT, { method: "POST" });
+
+  const navigate = useNavigate();
 
   const {
     register,
@@ -55,6 +58,7 @@ const RegistrationForm: React.FC = () => {
 
       toast.success("Registration successful!");
       reset(); 
+      navigate("/signin");
     } catch (err: unknown) {
 
       if (err instanceof HttpError && err.status === 409) {
