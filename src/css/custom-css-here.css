@@ -148,7 +148,7 @@ footer {
   transition: background-color 0.2s ease-in-out;
   box-shadow: 1px 2px 6px rgba(73, 71, 73, 0.014);
 }
-  
+
 .logout-btn {
   margin-top: auto;
   padding: 0.75rem 1rem;
@@ -160,28 +160,6 @@ footer {
 
   .logout-btn:hover {
     background-color: var(--clr-link-hover);
-  }
-}
-
-.book-btn {
-}
-
-/* Only for testing responsive functionality*/
-.nav-link {
-  color: var(--clr-link);
-  font-weight: 600;
-  text-decoration: none;
-  padding: 0.5rem 0;
-  transition: color 0.2s ease;
-}
-
-.nav-link:hover {
-  color: var(--clr-link-hover);
-}
-
-@media (width < 1400px) {
-  .nav-link {
-    display: none;
   }
 }
 
