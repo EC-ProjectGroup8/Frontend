@@ -41,6 +41,7 @@ const RegistrationForm: React.FC = () => {
   } = useForm<RegistrationFormData>({
     mode: "onSubmit",
     reValidateMode: "onChange",
+    shouldFocusError: true,
     defaultValues: {
       FirstName: "",
       LastName: "",
@@ -108,7 +109,7 @@ const RegistrationForm: React.FC = () => {
         {/* IMAGE SECTION */}
         <div className="image-section">
           <img
-            src="/src/assets/images/register-image.png"
+            src="/images/register-image.png"
             alt="Gym workout"
             className="image"
           />
@@ -123,11 +124,21 @@ const RegistrationForm: React.FC = () => {
         </div>
 
         {/* FORM */}
-        <form className="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form
+          className="form"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          aria-busy={isSubmitting}
+        >
           <h2 className="form-title text-3xl font-bold">Join Core Gym Club</h2>
           <p className="form-subtitle text-lg">
             Create your account to unlock your fitness journey.
           </p>
+
+          {/* Screen-reader for submitting */}
+          <span className="sr-only" role="status" aria-live="polite">
+            {isSubmitting ? "Submitting your registration..." : ""}
+          </span>
 
           {/* First Name */}
           <div className="form-group">
@@ -139,6 +150,7 @@ const RegistrationForm: React.FC = () => {
               className="form-input"
               placeholder="Enter your first name"
               type="text"
+              autoComplete="given-name"
               aria-invalid={!!errors.FirstName}
               {...register("FirstName", {
                 required: "First name is required",
@@ -168,6 +180,7 @@ const RegistrationForm: React.FC = () => {
               placeholder="Enter your Last name"
               type="text"
               aria-invalid={!!errors.LastName}
+              autoComplete="family-name"
               {...register("LastName", {
                 required: "Last name is required",
                 minLength: {
@@ -195,6 +208,7 @@ const RegistrationForm: React.FC = () => {
               className="form-input"
               placeholder="your@email.com"
               type="email"
+              autoComplete="email"
               aria-invalid={!!errors.Email}
               {...register("Email", {
                 required: "Email is required",
@@ -223,6 +237,7 @@ const RegistrationForm: React.FC = () => {
               className="form-input"
               placeholder="*********"
               type="password"
+              autoComplete="new-password"
               aria-invalid={!!errors.Password}
               {...register("Password", {
                 required: "Password is required",
@@ -252,6 +267,7 @@ const RegistrationForm: React.FC = () => {
               className="form-input"
               placeholder="*********"
               type="password"
+              autoComplete="new-password"
               aria-invalid={!!errors.confirmPassword}
               {...register("confirmPassword", {
                 required: "Please confirm your password",
