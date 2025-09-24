@@ -67,3 +67,13 @@ export default defineConfig([
   },
 ])
 ```
+
+## Json-Server
+
+<https://github.com/typicode/json-server>
+
+For local testing purposes, we use json-server to mock a backend. To start the server, run the following command:
+
+```bash
+npx json-server db.json
+```
