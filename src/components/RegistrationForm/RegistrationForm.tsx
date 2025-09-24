@@ -6,184 +6,269 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
 import "./RegistrationForm.css";
+import { toast } from "sonner";
+import Toast from "@/components/Toast/Toast";
+import type { RegistrationFormData } from "@/types/authTypes";
+import { useFetch } from "@/hooks/useFetch";
+import { Spinner } from "@/components/ui/shadcn-io/spinner";
 
-type FormData = {
-   fullName: string;
-   email: string;
-   password: string;
-   confirmPassword: string;
-   acceptTerms: boolean;
-};
+// Setting API Endpoint
+const API_AUTH_ENDPOINT = "http://localhost:3000/User";
 
 const RegistrationForm: React.FC = () => {
-   const {
-      register,
-      handleSubmit,
-      formState: { errors, isSubmitting },
-      setError,
-      getValues,
-   } = useForm<FormData>({
-      mode: "onSubmit",
-      reValidateMode: "onChange",
-      defaultValues: {
-         fullName: "",
-         email: "",
-         password: "",
-         confirmPassword: "",
-         acceptTerms: false,
-      },
-   });
+  // useFetch is an React Hook, we are calling it on top level
+  // Get user data for email validation
+  const {
+    data: existingUserData,
+    error: fetchError,
+    refetch: refetchExistingUserData,
+  } = useFetch<RegistrationFormData[]>(API_AUTH_ENDPOINT);
 
-   // Regex and dummy data
-   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-   const takenEmails = ["taken@example.com"];
+  // Post user data to API
+  const { post, error: postError } = useFetch<RegistrationFormData>(
+    API_AUTH_ENDPOINT,
+    {
+      method: "POST",
+    }
+  );
 
-   // Submit-funktion (fake API-call)
-   const onSubmit = async (formData: FormData) => {
-      if (takenEmails.includes(formData.email.trim().toLowerCase())) {
-         setError("email", { message: "Email already in use" });
-         return;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    getValues,
+  } = useForm<RegistrationFormData>({
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    defaultValues: {
+      FirstName: "",
+      LastName: "",
+      Email: "",
+      Password: "",
+      confirmPassword: "",
+      acceptTerms: false,
+    },
+  });
+
+  // Regex and dummy data
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+  // Submit-funktion (fake API-call)
+  const onSubmit = async (formData: RegistrationFormData) => {
+    // Best practise using Try catch regarding Async tasks
+    try {
+      // ---- Some validation before post --- //
+      // Check if existingUserData is available and no fetch error
+      if (fetchError || !existingUserData) {
+        toast.error("Failed to fetch existing user data");
+        return;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Fake delay
-   };
+      // Check if email already exists
+      const emailExists = existingUserData.some(
+        (item: RegistrationFormData) =>
+          item.Email.toLowerCase() === formData.Email.trim().toLowerCase()
+      );
 
-   return (
-      <div className="registration-container">
-         <div className="registration-frame">
-            {/* IMAGE SECTION */}
-            <div className="image-section">
-               <img
-                  src="/src/assets/images/register-image.png"
-                  alt="Gym workout"
-                  className="image"
-               />
-               <div className="image-overlay">
-                  <h1 className="image-title text-4xl text-right font-bold italic">CoreGymClub</h1>
-                  <p className="image-tagline font-bold text-2xl">
-                     Transform Your Body. Elevate Your Life.
-                  </p>
-               </div>
-            </div>
+      // If email exists, set error and return
+      if (emailExists) {
+        setError("Email", { message: "This email is already registered." });
+        toast.error("Registration failed: Email is already in use.");
+        return;
+      }
 
-            {/* FORM */}
-            <form className="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-               <h2 className="form-title text-3xl font-bold">Join Core Gym Club</h2>
-               <p className="form-subtitle text-lg">
-                  Create your account to unlock your fitness journey.
-               </p>
+      // If post error, set error and return
+      if (postError) {
+        toast.error("Registration failed: " + postError);
+        return;
+      }
+      // ---- Some validation before post --- END //
 
-               {/* Full Name */}
-               <div className="form-group">
-                  <Label className="form-label text-sm font-bold" htmlFor="fullName">
-                     Full Name
-                  </Label>
-                  <Input
-                     id="fullName"
-                     className="form-input"
-                     placeholder="Enter your full name"
-                     type="text"
-                     aria-invalid={!!errors.fullName}
-                     {...register("fullName", {
-                        required: "Full name is required",
-                        minLength: {
-                           value: 2,
-                           message: "Full name must be at least 2 characters",
-                        },
-                        validate: (value) =>
-                           value.trim().length > 0 ||
-                           "Full name cannot be empty",
-                     })}
-                  />
-                  {errors.fullName && (
-                     <p className="form-error text-sm" aria-live="polite">
-                        {errors.fullName.message}
-                     </p>
-                  )}
-               </div>
+      // Post user data to API
+      await post(formData);
+      // Refetch existing user data
+      toast.success("Registration successful!");
+      // Reset form and update existing user data, to avoid Stale
+      // data
+      refetchExistingUserData();
+    } catch (postError) {
+      toast.error(
+        (postError as string) || "Something went wrong. Please try again later."
+      );
+    }
+  };
 
-               {/* Email */}
-               <div className="form-group">
-                  <Label className="form-label text-sm font-bold" htmlFor="email">
-                     Email Address
-                  </Label>
-                  <Input
-                     id="email"
-                     className="form-input"
-                     placeholder="your@email.com"
-                     type="email"
-                     aria-invalid={!!errors.email}
-                     {...register("email", {
-                        required: "Email is required",
-                        pattern: {
-                           value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                           message: "Invalid email format",
-                        },
-                        validate: (value) =>
-                           value.trim().length > 0 || "Email cannot be empty",
-                     })}
-                  />
-                  {errors.email && (
-                     <p className="form-error text-sm" aria-live="polite">
-                        {errors.email.message}
-                     </p>
-                  )}
-               </div>
+  return (
+    <div className="registration-container">
+      <div className="registration-frame">
+        {/* Toast */}
+        <Toast />
 
-               {/* Password */}
-               <div className="form-group">
-                  <Label className="form-label text-sm font-bold" htmlFor="password">
-                     Password
-                  </Label>
-                  <Input
-                     id="password"
-                     className="form-input"
-                     placeholder="*********"
-                     type="password"
-                     aria-invalid={!!errors.password}
-                     {...register("password", {
-                        required: "Password is required",
-                        minLength: { value: 8, message: "Min 8 characters" },
-                        validate: (value) =>
-                           passwordRegex.test(value) ||
-                           "Need one uppercase, one lowercase and one digit",
-                     })}
-                  />
-                  {errors.password && (
-                     <p className="form-error text-sm" aria-live="polite">
-                        {errors.password.message}
-                     </p>
-                  )}
-               </div>
+        {/* IMAGE SECTION */}
+        <div className="image-section">
+          <img
+            src="/src/assets/images/register-image.png"
+            alt="Gym workout"
+            className="image"
+          />
+          <div className="image-overlay">
+            <h1 className="image-title text-4xl text-right font-bold italic">
+              CoreGymClub
+            </h1>
+            <p className="image-tagline font-bold text-2xl">
+              Transform Your Body. Elevate Your Life.
+            </p>
+          </div>
+        </div>
 
-               {/* Confirm Password */}
-               <div className="form-group">
-                  <Label className="form-label text-sm font-bold" htmlFor="confirmPassword">
-                     Confirm Password
-                  </Label>
-                  <Input
-                     id="confirmPassword"
-                     className="form-input"
-                     placeholder="*********"
-                     type="password"
-                     aria-invalid={!!errors.confirmPassword}
-                     {...register("confirmPassword", {
-                        required: "Please confirm your password",
-                        validate: (value) =>
-                           value === getValues("password") ||
-                           "Passwords do not match",
-                     })}
-                  />
-                  {errors.confirmPassword && (
-                     <p className="form-error text-sm" aria-live="polite">
-                        {errors.confirmPassword.message}
-                     </p>
-                  )}
-               </div>
+        {/* FORM */}
+        <form className="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <h2 className="form-title text-3xl font-bold">Join Core Gym Club</h2>
+          <p className="form-subtitle text-lg">
+            Create your account to unlock your fitness journey.
+          </p>
 
-               {/* NO TERMS YET */}
-               {/* Terms */}
-               {/* <div className="form-group form-legal">
+          {/* First Name */}
+          <div className="form-group">
+            <Label className="form-label text-sm font-bold" htmlFor="FirstName">
+              First Name
+            </Label>
+            <Input
+              id="FirstName"
+              className="form-input"
+              placeholder="Enter your first name"
+              type="text"
+              aria-invalid={!!errors.FirstName}
+              {...register("FirstName", {
+                required: "First name is required",
+                minLength: {
+                  value: 2,
+                  message: "First name must be at least 2 characters",
+                },
+                validate: (value) =>
+                  value.trim().length > 0 || "First name cannot be empty",
+              })}
+            />
+            {errors.FirstName && (
+              <p className="form-error text-sm" aria-live="polite">
+                {errors.FirstName.message}
+              </p>
+            )}
+          </div>
+
+          {/* Last Name */}
+          <div className="form-group">
+            <Label className="form-label text-sm font-bold" htmlFor="LastName">
+              Last Name
+            </Label>
+            <Input
+              id="LastName"
+              className="form-input"
+              placeholder="Enter your Last name"
+              type="text"
+              aria-invalid={!!errors.LastName}
+              {...register("LastName", {
+                required: "Last name is required",
+                minLength: {
+                  value: 2,
+                  message: "Last name must be at least 2 characters",
+                },
+                validate: (value) =>
+                  value.trim().length > 0 || "Last name cannot be empty",
+              })}
+            />
+            {errors.LastName && (
+              <p className="form-error text-sm" aria-live="polite">
+                {errors.LastName.message}
+              </p>
+            )}
+          </div>
+
+          {/* Email */}
+          <div className="form-group">
+            <Label className="form-label text-sm font-bold" htmlFor="email">
+              Email Address
+            </Label>
+            <Input
+              id="email"
+              className="form-input"
+              placeholder="your@email.com"
+              type="email"
+              aria-invalid={!!errors.Email}
+              {...register("Email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Invalid email format",
+                },
+                validate: (value) =>
+                  value.trim().length > 0 || "Email cannot be empty",
+              })}
+            />
+            {errors.Email && (
+              <p className="form-error text-sm" aria-live="polite">
+                {errors.Email.message}
+              </p>
+            )}
+          </div>
+
+          {/* Password */}
+          <div className="form-group">
+            <Label className="form-label text-sm font-bold" htmlFor="password">
+              Password
+            </Label>
+            <Input
+              id="password"
+              className="form-input"
+              placeholder="*********"
+              type="password"
+              aria-invalid={!!errors.Password}
+              {...register("Password", {
+                required: "Password is required",
+                minLength: { value: 8, message: "Min 8 characters" },
+                validate: (value) =>
+                  passwordRegex.test(value) ||
+                  "Need one uppercase, one lowercase and one digit",
+              })}
+            />
+            {errors.Password && (
+              <p className="form-error text-sm" aria-live="polite">
+                {errors.Password.message}
+              </p>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div className="form-group">
+            <Label
+              className="form-label text-sm font-bold"
+              htmlFor="confirmPassword"
+            >
+              Confirm Password
+            </Label>
+            <Input
+              id="confirmPassword"
+              className="form-input"
+              placeholder="*********"
+              type="password"
+              aria-invalid={!!errors.confirmPassword}
+              {...register("confirmPassword", {
+                required: "Please confirm your password",
+                validate: (value) =>
+                  value === getValues("Password") || "Passwords do not match",
+              })}
+            />
+            {errors.confirmPassword && (
+              <p className="form-error text-sm" aria-live="polite">
+                {errors.confirmPassword.message}
+              </p>
+            )}
+          </div>
+
+          {/* NO TERMS YET */}
+          {/* Terms */}
+          {/* <div className="form-group form-legal">
             <div className="checkbox-container">
             <input
                id="acceptTerms"
@@ -208,23 +293,26 @@ const RegistrationForm: React.FC = () => {
             )}
         </div> */}
 
-               {/* Submit */}
-               <Button
-                  type="submit"
-                  className="form-button"
-                  disabled={isSubmitting}
-               >
-                  {isSubmitting ? "Registering..." : "Register"}
-               </Button>
+          {/* Submit */}
+          <Button type="submit" className="form-button" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Spinner />
+                Registering...
+              </>
+            ) : (
+              "Register"
+            )}
+          </Button>
 
-               {/* Sign in */}
-               <p className="form-signin">
-                  Already have an account? <a href="/signin">Sign in</a>
-               </p>
-            </form>
-         </div>
+          {/* Sign in */}
+          <p className="form-signin">
+            Already have an account? <a href="/signin">Sign in</a>
+          </p>
+        </form>
       </div>
-   );
+    </div>
+  );
 };
 
 export default RegistrationForm;

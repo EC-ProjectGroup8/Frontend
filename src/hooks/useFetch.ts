@@ -6,15 +6,21 @@ export function useFetch<T>(url: string, init?: RequestInit) {
   const [error, setError] = React.useState<string>("");
 
   const fetchData = React.useCallback(
-    async (signal?: AbortSignal) => {
+    async (options?: RequestInit, signal?: AbortSignal) => {
       setLoading(true);
       setError("");
 
       try {
         const res = await fetch(url, {
           ...(init || {}),
+          ...(options || {}),
+
           signal,
-          headers: { Accept: "application/json", ...(init?.headers || {}) },
+          headers: {
+            Accept: "application/json",
+            ...(init?.headers || {}),
+            ...(options?.headers || {}),
+          },
         });
 
         if (!res.ok) {
@@ -58,16 +64,38 @@ export function useFetch<T>(url: string, init?: RequestInit) {
 
   React.useEffect(() => {
     const controller = new AbortController();
-    fetchData(controller.signal);
+    // Only fetch on mount if it's a GET request
+    if (!init?.method || init.method.toUpperCase() === "GET") {
+      fetchData(init, controller.signal);
+    } else {
+      setLoading(false);
+    }
     return () => controller.abort();
-  }, [fetchData]);
+  }, [fetchData, init]);
 
+  // Manual refetch
   // Manual refetch
   const refetch = React.useCallback(() => {
     const controller = new AbortController();
-    fetchData(controller.signal);
+    fetchData(init, controller.signal);
     return () => controller.abort();
-  }, [fetchData]);
+  }, [fetchData, init]);
 
-  return { data, loading, error, refetch };
+  // Manual POST request
+  const post = React.useCallback(
+    async (body: unknown) => {
+      const controller = new AbortController();
+      const postInit: RequestInit = {
+        ...(init || {}),
+        method: "POST",
+        body: JSON.stringify(body),
+      };
+      fetchData(postInit, controller.signal);
+      // Wait for the request to complete before returning, returning data 
+      return await fetchData(postInit, controller.signal);
+    },
+    [fetchData, init]
+  );
+
+  return { data, loading, error, refetch, post };
 }
