@@ -57,6 +57,15 @@
   border-radius: 1rem;
   box-shadow: 1px 2px 6px rgba(73, 71, 73, 0.014);
   height: auto;
+
+  .logo-container > span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--clr-primary-600);
+    @media (width >= 768px) {
+      display: none;
+    }
+  }
 }
 
 @media (width >= 768px) {
@@ -111,6 +120,7 @@ footer {
 .logo-container {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   max-width: 60px;
   @media (width >=768px) {
     max-width: 100%;
@@ -120,7 +130,7 @@ footer {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--clr-primary-600);
-    @media (width >=1400px) {
+    @media (width >=768px) {
       display: flex;
     }
   }

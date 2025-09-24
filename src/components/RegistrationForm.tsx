@@ -1,11 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-
-import "./RegistrationForm.css";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import "../css/sign-in-up-form.css";
 
 type FormData = {
    firstName: string,
