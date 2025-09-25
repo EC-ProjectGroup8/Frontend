@@ -18,44 +18,51 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const handleBookWorkout = async () => {
-  // 1. Hämta e-post från sessionStorage
-  const userEmail = sessionStorage.getItem("loggedInUserEmail");
+    // 1. Hämta e-post från sessionStorage
+    const userEmail = sessionStorage.getItem("loggedInUserEmail");
 
-  // 2. Kontrollera att användaren är inloggad
-  if (!userEmail) {
-    setError("Du måste vara inloggad för att kunna boka ett pass.");
-    return; // Avbryt om ingen e-post finns
-  }
-
-  setIsLoading(true);
-  setError(null);
-
-  try {
-    const response = await fetch(
-      "https://bookingservice-api-e0e6hed3dca6egak.swedencentral-01.azurewebsites.net/api/Bookings",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userEmail: userEmail, // 3. Använd den hämtade e-posten
-          workoutIdentifier: workout.id,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Kunde inte boka passet. Försök igen.");
+    // 2. Kontrollera att användaren är inloggad
+    if (!userEmail) {
+      setError("Du måste vara inloggad för att kunna boka ett pass.");
+      return; // Avbryt om ingen e-post finns
     }
 
-    setIsBooked(true);
-  } catch (err: any) {
-    setError(err.message || "Ett oväntat fel inträffade.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        "https://bookingservice-api-e0e6hed3dca6egak.swedencentral-01.azurewebsites.net/api/Bookings",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userEmail: userEmail, // 3. Använd den hämtade e-posten
+            workoutIdentifier: workout.id,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Kunde inte boka passet. Försök igen.");
+      }
+
+      setIsBooked(true);
+      // Informera föräldern om bokningen
+      onBook(workout.id);
+    } catch (err: unknown) {
+      // rätt hantering av unknown i TypeScript
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err) || "Ett oväntat fel inträffade.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <tr
