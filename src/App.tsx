@@ -4,6 +4,12 @@ import UserLogin from "@/pages/UserLogin";
 import Workouts from "@/pages/Workouts";
 import { Routes, Route } from "react-router-dom";
 import MemberLayout from "./layouts/MemberLayout";
+import MyBookedWorkouts from "./pages/MyBookedWorkouts";
+
+
+
+
+
 
 function App() {
   return (
@@ -17,7 +23,15 @@ function App() {
       <Route path="/workouts" element={<MemberLayout />}>
         <Route index element={<Workouts />} />
       </Route>
+
+    <Route path="/my-booked-workouts" element={<MemberLayout />}>
+       <Route index element={<MyBookedWorkouts />} />
+    </Route>
+
+     
+
     </Routes>
+
   );
 }
 
