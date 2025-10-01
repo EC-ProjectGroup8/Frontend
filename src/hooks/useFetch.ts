@@ -11,9 +11,9 @@ export class HttpError extends Error {
   }
 }
 
-export function useFetch<T>(url: string, init?: RequestInit) {
+export function useFetch<T>(url: string | null, init?: RequestInit) { // allow null url
   const [data, setData] = React.useState<T | null>(null);
-  const [loading, setLoading] = React.useState<boolean>(true);
+  const [loading, setLoading] = React.useState<boolean>(!!url); // only loading if url is provided
   const [error, setError] = React.useState<string>("");
 
   const fetchData = React.useCallback(
@@ -21,6 +21,12 @@ export function useFetch<T>(url: string, init?: RequestInit) {
       options?: RequestInit,
       signal?: AbortSignal
     ): Promise<R | null> => {
+      // If no url provided, don't attempt to fetch
+      if (!url) {
+        setLoading(false);
+        setData(null); // clear previous data if url becomes null
+        return null;
+      }
       setLoading(true);
       setError("");
 
@@ -85,7 +91,13 @@ export function useFetch<T>(url: string, init?: RequestInit) {
     [url, init]
   );
 
-  React.useEffect(() => {
+  React.useEffect(() => { 
+    if (!url) {
+      // Nothing to fetch
+      setLoading(false);
+      setData(null); // clear previous data if url becomes null
+      return;
+    }
     const controller = new AbortController();
     if (!init?.method || init.method.toUpperCase() === "GET") {
       fetchData(init, controller.signal).catch(() => {});
@@ -93,13 +105,14 @@ export function useFetch<T>(url: string, init?: RequestInit) {
       setLoading(false);
     }
     return () => controller.abort();
-  }, [fetchData, init]);
+  }, [fetchData, init, url]); // include url in deps to refetch when url changes
 
   const refetch = React.useCallback(() => {
+    if (!url) return () => {}; // no-op if no url
     const controller = new AbortController();
     fetchData(init, controller.signal).catch(() => {});
     return () => controller.abort();
-  }, [fetchData, init]);
+  }, [fetchData, init, url]); // include url in deps to refetch when url changes
 
   const post = React.useCallback(
     async <R = T>(body: unknown) => {

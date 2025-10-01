@@ -4,7 +4,6 @@ import { createPortal } from "react-dom";
 const FOCUSABLE_SELECTOR =
    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
-
 type ModalProps = {
    isOpen: boolean;
    onClose: () => void;
@@ -25,9 +24,8 @@ export function Modal({
    ariaDescribedById,
 }: ModalProps) {
    const modalRef = useRef<HTMLDivElement>(null);
+   const headingRef = useRef<HTMLHeadingElement>(null);
    const modalId = useId();
-
-
 
    // Disable scrolling on the body while the modal is open
    useEffect(() => {
@@ -39,8 +37,6 @@ export function Modal({
       };
    }, [isOpen]);
 
-
-
    // Handle focus management and keyboard interactions when the modal opens
    useEffect(() => {
       if (!isOpen) return;
@@ -49,28 +45,23 @@ export function Modal({
 
       // Set focus to the first focusable element in the modal
       const setInitialFocus = () => {
-         const root = modalRef.current;
-         if (!root) return;
-         
-         const nodeList = root.querySelectorAll(FOCUSABLE_SELECTOR); 
-         const focusables: HTMLElement[] = Array.from(nodeList).filter(
-            (el): el is HTMLElement =>
-               el instanceof HTMLElement && !el.hasAttribute("disabled")
-         );
-         (focusables[0] ?? root)?.focus();
+         if (headingRef.current) {
+            headingRef.current.focus();
+         } else {
+            modalRef.current?.focus();
+         }
       };
 
-      
       // Listen for key presses: close on Escape, trap focus with Tab
       const onKey = (e: KeyboardEvent) => {
-         if (e.key === "Escape") { 
+         if (e.key === "Escape") {
             onClose();
             return;
          }
          if (e.key === "Tab") {
             const root = modalRef.current;
             if (!root) return;
-            
+
             // Get all focusable elements within the modal
             const nodeList = root.querySelectorAll(FOCUSABLE_SELECTOR);
             const focusables: HTMLElement[] = Array.from(nodeList).filter(
@@ -84,12 +75,12 @@ export function Modal({
 
             // Determine the currently focused element
             const active = (document.activeElement as HTMLElement) || null;
-            
-            if (e.shiftKey) {               
+
+            if (e.shiftKey) {
                // If shifting back from the first element, focus the last
                if (
                   active === first ||
-                  !active || 
+                  !active ||
                   !focusables.includes(active)
                ) {
                   last.focus();
@@ -119,18 +110,14 @@ export function Modal({
       };
    }, [isOpen, onClose]);
 
-
    // Return null if the modal is not open
    if (!isOpen) return null;
 
-   
    // Skip rendering on the server-side
    if (typeof document === "undefined") return null;
 
-
    // Locate the portal root element in the DOM
    const portalRoot = document.getElementById("portal-root");
-
 
    const content = (
       <div
@@ -143,25 +130,37 @@ export function Modal({
             className={`modal ${className || ""}`}
             role="dialog"
             aria-modal="true"
-            aria-labelledby={heading ? modalId : undefined} 
+            aria-labelledby={heading ? modalId : undefined}
             aria-label={!heading ? ariaLabel : undefined}
-            aria-describedby={ariaDescribedById} 
+            aria-describedby={ariaDescribedById}
             tabIndex={-1}
          >
+            <button
+               className="modal-close"
+               onClick={onClose}
+               type="button"
+               aria-label="Close"
+            >
+               <svg
+                  viewBox="0 0 24 24"
+                  width="28"
+                  height="28"
+                  aria-hidden="true"
+               >
+                  <path
+                     d="M18 6L6 18M6 6l12 12"
+                     stroke="currentColor"
+                     strokeWidth="2"
+                     strokeLinecap="round"
+                  />
+               </svg>
+            </button>
             <header className="modal-header">
                {heading && (
-                  <h2 id={modalId} className="modal-title">
+                  <h2 id={modalId} className="modal-title" tabIndex={-1}>
                      {heading}
                   </h2>
                )}
-               <button
-                  className="modal-close"
-                  onClick={onClose}
-                  type="button"
-                  aria-label="Close"
-               >
-                  &times;
-               </button>
             </header>
             <div className="modal-body">{children}</div>
          </div>

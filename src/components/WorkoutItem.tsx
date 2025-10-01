@@ -5,13 +5,15 @@ import type { WorkoutResponseModel } from "@/types/workout";
 type WorkoutItemProps = {
   workout: WorkoutResponseModel;
   index: number;
-  onBook: (workoutId: string) => void;
+  onBook: (workoutId: string) => void; 
+  onViewDetails?: (workoutId: string) => void; // optional callback for viewing details
 };
 
 const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
   workout,
   index,
   onBook,
+  onViewDetails,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isBooked, setIsBooked] = useState(false);
@@ -69,6 +71,8 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
       className={`${
         index % 2 === 0 ? "bg-white" : "bg-gray-50"
       } hover:bg-indigo-50 transition-colors`}
+      onClick={() => onViewDetails && onViewDetails(workout.id)}
+      style={{ cursor: onViewDetails ? "pointer" : undefined }} 
       data-testid={`workout-row-${workout.id}`}
     >
       <td className="px-6 py-4 text-gray-800">{workout.title}</td>
@@ -80,7 +84,10 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
       <td className="px-6 py-4">
         <button
           className="primary-button book-btn hover:shadow-md transition-all duration-200 ease-in-out active:scale-95 focus:scale-102 hover:scale-102 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          onClick={handleBookWorkout}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleBookWorkout();
+          }}
           aria-label={`Book workout ${workout.title}`}
           disabled={isLoading || isBooked}
         >

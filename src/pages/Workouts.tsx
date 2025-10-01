@@ -2,6 +2,7 @@ import React from "react";
 import Spinner from "@/components/Spinner/Spinner";
 import { useFetch } from "@/hooks/useFetch";
 import { WorkoutItem } from "@/components/WorkoutItem";
+import WorkoutDetailsModal from "@/components/WorkoutDetailsModal";
 import type { WorkoutResponseModel } from "@/types/workout";
 
 const WORKOUTS_ENDPOINT =
@@ -10,6 +11,19 @@ const WORKOUTS_ENDPOINT =
 const WorkoutsPage: React.FC = () => {
   const { data, loading, error, refetch } =
     useFetch<WorkoutResponseModel[]>(WORKOUTS_ENDPOINT);
+
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const openDetails = (id: string) => {
+    setSelectedId(id);
+    setIsModalOpen(true);
+  };
+
+  const closeDetails = () => {
+    setIsModalOpen(false);
+    setSelectedId(null);
+  };
 
   const handleBook = async (workoutId: string) => {
     alert(`Book clicked for workout id: ${workoutId}`);
@@ -65,6 +79,7 @@ const WorkoutsPage: React.FC = () => {
                   workout={w}
                   index={i}
                   onBook={handleBook}
+                  onViewDetails={openDetails}
                 />
               ))}
             </tbody>
@@ -73,6 +88,13 @@ const WorkoutsPage: React.FC = () => {
       ) : !error ? (
         <p className="text-gray-600 text-center">No workouts found.</p>
       ) : null}
+
+      {/* Details modal */}
+      <WorkoutDetailsModal
+        workoutId={selectedId}
+        isOpen={isModalOpen}
+        onClose={closeDetails}
+      />
     </div>
   );
 };
