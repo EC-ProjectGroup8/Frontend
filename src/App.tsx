@@ -4,6 +4,7 @@ import UserLogin from "@/pages/UserLogin";
 import Pass from "@/pages/Workouts";
 import { Routes, Route } from "react-router-dom";
 import MemberLayout from "./layouts/MemberLayout";
+import MyBookedWorkouts from "./pages/MyBookedWorkouts";
 import RequestPasswordReset from "./pages/RequestPasswordReset";
 
 function App() {
@@ -19,7 +20,15 @@ function App() {
       <Route path="/pass" element={<MemberLayout />}>
         <Route index element={<Pass />} />
       </Route>
+
+    <Route path="/my-booked-workouts" element={<MemberLayout />}>
+       <Route index element={<MyBookedWorkouts />} />
+    </Route>
+
+     
+
     </Routes>
+
   );
 }
 
