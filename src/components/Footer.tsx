@@ -1,8 +1,9 @@
 const Footer = () => {
   return (
     <footer>
-      <p>
-        &copy; {new Date().getFullYear()} Core Gym Club. All rights reserved.
+      <p className="text-center text-sm text-gray-500 py-4">
+        &copy; {new Date().getFullYear()} Core Gym Club. Alla rättigheter
+        förbehållna.
       </p>
     </footer>
   );

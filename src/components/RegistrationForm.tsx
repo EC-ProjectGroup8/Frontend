@@ -51,25 +51,27 @@ const RegistrationForm: React.FC = () => {
         LastName: formData.LastName.trim(),
         Email: formData.Email.trim(),
         Password: formData.Password,
-        ConfirmPassword: formData.confirmPassword, 
+        ConfirmPassword: formData.confirmPassword,
       };
 
       await post(payload);
 
-      toast.success("Registration successful!");
-      reset(); 
+      toast.success("Registreringen lyckades!");
+      reset();
       navigate("/signin");
     } catch (err: unknown) {
-
       if (err instanceof HttpError && err.status === 409) {
-        setError("Email", { message: "This email is already registered." });
-        toast.error("Email is already in use.");
+        setError("Email", {
+          message: "Den här e-postadressen är redan registrerad.",
+        });
+        toast.error("E-postadressen används redan.");
         return;
       }
 
-
       const message =
-        err instanceof Error ? err.message : "Registration failed. Please try again.";
+        err instanceof Error
+          ? err.message
+          : "Registreringen misslyckades. Försök igen.";
       toast.error(message);
     }
   };
@@ -92,7 +94,7 @@ const RegistrationForm: React.FC = () => {
               CoreGymClub
             </h1>
             <p className="image-tagline font-bold text-2xl">
-              Transform Your Body. Elevate Your Life.
+              Din hälsa, ditt välmående, din styrka.
             </p>
           </div>
         </div>
@@ -104,36 +106,38 @@ const RegistrationForm: React.FC = () => {
           noValidate
           aria-busy={isSubmitting}
         >
-          <h2 className="form-title text-3xl font-bold">Join Core Gym Club</h2>
+          <h2 className="form-title text-3xl font-bold">
+            Bli medlem hos Core Gym Club
+          </h2>
           <p className="form-subtitle text-lg">
-            Create your account to unlock your fitness journey.
+            Börja din träningsresa med ett konto hos oss.
           </p>
 
           {/* Screen-reader för submit-status */}
           <span className="sr-only" role="status" aria-live="polite">
-            {isSubmitting ? "Submitting your registration..." : ""}
+            {isSubmitting ? "Skickar din registrering..." : ""}
           </span>
 
           {/* First Name */}
           <div className="form-group">
             <Label className="form-label text-sm font-bold" htmlFor="FirstName">
-              First Name
+              Förnamn
             </Label>
             <Input
               id="FirstName"
               className="form-input"
-              placeholder="Enter your first name"
+              placeholder="Ange ditt förnamn"
               type="text"
               autoComplete="given-name"
               aria-invalid={!!errors.FirstName}
               {...register("FirstName", {
-                required: "First name is required",
+                required: "Förnamn krävs",
                 minLength: {
                   value: 2,
-                  message: "First name must be at least 2 characters",
+                  message: "Förnamnet måste vara minst 2 tecken",
                 },
                 validate: (value) =>
-                  value.trim().length > 0 || "First name cannot be empty",
+                  value.trim().length > 0 || "Förnamnet får inte vara tomt",
               })}
             />
             {errors.FirstName && (
@@ -146,23 +150,23 @@ const RegistrationForm: React.FC = () => {
           {/* Last Name */}
           <div className="form-group">
             <Label className="form-label text-sm font-bold" htmlFor="LastName">
-              Last Name
+              Efternamn
             </Label>
             <Input
               id="LastName"
               className="form-input"
-              placeholder="Enter your Last name"
+              placeholder="Ange ditt efternamn"
               type="text"
               aria-invalid={!!errors.LastName}
               autoComplete="family-name"
               {...register("LastName", {
-                required: "Last name is required",
+                required: "Efternamn krävs",
                 minLength: {
                   value: 2,
-                  message: "Last name must be at least 2 characters",
+                  message: "Efternamnet måste vara minst 2 tecken",
                 },
                 validate: (value) =>
-                  value.trim().length > 0 || "Last name cannot be empty",
+                  value.trim().length > 0 || "Efternamnet får inte vara tomt",
               })}
             />
             {errors.LastName && (
@@ -175,23 +179,23 @@ const RegistrationForm: React.FC = () => {
           {/* Email */}
           <div className="form-group">
             <Label className="form-label text-sm font-bold" htmlFor="email">
-              Email Address
+              E-postadress
             </Label>
             <Input
               id="email"
               className="form-input"
-              placeholder="your@email.com"
+              placeholder="din@epost.se"
               type="email"
               autoComplete="email"
               aria-invalid={!!errors.Email}
               {...register("Email", {
-                required: "Email is required",
+                required: "Du måste ange en e-postadress",
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Invalid email format",
+                  message: "Ogiltigt e-postformat",
                 },
                 validate: (value) =>
-                  value.trim().length > 0 || "Email cannot be empty",
+                  value.trim().length > 0 || "E-postadressen får inte vara tom",
               })}
             />
             {errors.Email && (
@@ -204,7 +208,7 @@ const RegistrationForm: React.FC = () => {
           {/* Password */}
           <div className="form-group">
             <Label className="form-label text-sm font-bold" htmlFor="password">
-              Password
+              Lösenord
             </Label>
             <Input
               id="password"
@@ -214,11 +218,11 @@ const RegistrationForm: React.FC = () => {
               autoComplete="new-password"
               aria-invalid={!!errors.Password}
               {...register("Password", {
-                required: "Password is required",
-                minLength: { value: 8, message: "Min 8 characters" },
+                required: "Lösenord krävs",
+                minLength: { value: 8, message: "Minst 8 tecken." },
                 validate: (value) =>
                   passwordRegex.test(value) ||
-                  "Need one uppercase, one lowercase and one digit",
+                  "Lösenordet måste innehålla minst en stor bokstav, en liten bokstav, en siffra och ett specialtecken.",
               })}
             />
             {errors.Password && (
@@ -234,7 +238,7 @@ const RegistrationForm: React.FC = () => {
               className="form-label text-sm font-bold"
               htmlFor="confirmPassword"
             >
-              Confirm Password
+              Bekräfta lösenord
             </Label>
             <Input
               id="confirmPassword"
@@ -244,9 +248,9 @@ const RegistrationForm: React.FC = () => {
               autoComplete="new-password"
               aria-invalid={!!errors.confirmPassword}
               {...register("confirmPassword", {
-                required: "Please confirm your password",
+                required: "Vänligen bekräfta ditt lösenord",
                 validate: (value) =>
-                  value === getValues("Password") || "Passwords do not match",
+                  value === getValues("Password") || "Lösenorden matchar inte",
               })}
             />
             {errors.confirmPassword && (
@@ -261,16 +265,16 @@ const RegistrationForm: React.FC = () => {
             {isSubmitting ? (
               <>
                 <Spinner />
-                Registering...
+                Skapar konto...
               </>
             ) : (
-              "Register"
+              "Skapa konto"
             )}
           </Button>
 
           {/* Sign in */}
           <p className="form-signin">
-            Already have an account? <a href="/signin">Sign in</a>
+            Har du redan ett konto? <a href="/signin">Logga in</a>
           </p>
         </form>
       </div>

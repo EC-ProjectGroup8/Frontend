@@ -1,7 +1,7 @@
 import BaseLayout from "@/layouts/BaseLayout";
 import Register from "@/pages/Register";
 import UserLogin from "@/pages/UserLogin";
-import Workouts from "@/pages/Workouts";
+import Pass from "@/pages/Workouts";
 import { Routes, Route } from "react-router-dom";
 import MemberLayout from "./layouts/MemberLayout";
 
@@ -14,8 +14,8 @@ function App() {
         <Route path="/register" element={<Register />} />
       </Route>
 
-      <Route path="/workouts" element={<MemberLayout />}>
-        <Route index element={<Workouts />} />
+      <Route path="/pass" element={<MemberLayout />}>
+        <Route index element={<Pass />} />
       </Route>
     </Routes>
   );

@@ -72,7 +72,9 @@ const WorkoutsPage: React.FC = () => {
           role="alert"
           className="bg-red-100 text-red-800 p-4 rounded-lg mb-4 shadow"
         >
+
           <p>{`Kunde inte ladda passen: ${error}`}</p>
+
           <button
             onClick={refetch}
             className="mt-2 text-sm underline hover:text-red-600"
@@ -101,7 +103,10 @@ const WorkoutsPage: React.FC = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Handling
+
+
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
