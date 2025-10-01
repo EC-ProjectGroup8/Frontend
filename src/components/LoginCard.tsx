@@ -183,6 +183,13 @@ const LoginCard: React.FC = () => {
               )}
             </div>
 
+
+ <p className="pt-4 pb-8 text-center">
+              I forget my password <a className="form-signin" href="/reset-password">Reset Password</a>
+            </p>
+
+
+
             <Button
               type="submit"
               className="form-button"

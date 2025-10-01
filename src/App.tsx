@@ -4,6 +4,7 @@ import UserLogin from "@/pages/UserLogin";
 import Pass from "@/pages/Workouts";
 import { Routes, Route } from "react-router-dom";
 import MemberLayout from "./layouts/MemberLayout";
+import RequestPasswordReset from "./pages/RequestPasswordReset";
 
 function App() {
   return (
@@ -12,6 +13,8 @@ function App() {
         <Route index element={<UserLogin />} />
         <Route path="/signin" element={<UserLogin />} />
         <Route path="/register" element={<Register />} />
+        <Route path="reset-password" element={<RequestPasswordReset />} />
+
       </Route>
 
       <Route path="/pass" element={<MemberLayout />}>
