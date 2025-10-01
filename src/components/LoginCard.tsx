@@ -192,7 +192,7 @@ const LoginCard: React.FC = () => {
             </Button>
 
             <p className="form-signin">
-              Har du inget konto? <a href="/Register">Skapa konto</a>
+              Har du inget konto? <a href="/skapa-konto">Skapa konto</a>
             </p>
           </form>
         </div>

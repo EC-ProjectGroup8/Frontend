@@ -274,7 +274,7 @@ const RegistrationForm: React.FC = () => {
 
           {/* Sign in */}
           <p className="form-signin">
-            Har du redan ett konto? <a href="/signin">Logga in</a>
+            Har du redan ett konto? <a href="/logga-in">Logga in</a>
           </p>
         </form>
       </div>

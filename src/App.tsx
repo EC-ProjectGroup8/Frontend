@@ -11,12 +11,9 @@ function App() {
     <Routes>
       <Route path="/" element={<BaseLayout />}>
         <Route index element={<UserLogin />} />
-        <Route path="/signin" element={<UserLogin />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/reset-password" element={<RequestPasswordForm />} />
-
-
-
+        <Route path="/logga-in" element={<UserLogin />} />
+        <Route path="/skapa-konto" element={<Register />} />
+        <Route path="/skapa-losenord" element={<RequestPasswordForm />} />
       </Route>
 
       <Route path="/pass" element={<MemberLayout />}>

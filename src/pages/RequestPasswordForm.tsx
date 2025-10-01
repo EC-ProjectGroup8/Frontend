@@ -1,8 +1,9 @@
+import PasswordForm from "@/components/PasswordForm";
+
 function RequestPasswordForm() {
   return (
     <div>
-
-      Hello :)
+        <PasswordForm />
     </div>
   );
 }
