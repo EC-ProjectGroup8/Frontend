@@ -26,12 +26,12 @@ const WorkoutsPage: React.FC = () => {
           role="alert"
           className="bg-red-100 text-red-800 p-4 rounded-lg mb-4 shadow"
         >
-          <p>{`Failed to load workouts: ${error}`}</p>
+          <p>{`Vi kunde inte hämta passen just nu.: ${error}`}</p>
           <button
             onClick={() => refetch()}
             className="mt-2 text-sm underline hover:text-red-600"
           >
-            Try again
+            Försök igen
           </button>
         </div>
       )}
@@ -42,20 +42,18 @@ const WorkoutsPage: React.FC = () => {
             <thead className="bg-gray-100 sticky top-0">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Title
+                  Pass
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Location
+                  Plats
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Start time
+                  Start
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Instructor
+                  Instruktör
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Action
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
