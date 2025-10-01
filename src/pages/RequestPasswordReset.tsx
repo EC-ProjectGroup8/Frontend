@@ -1,11 +1,11 @@
-import EmailForm from "@/components/EmailForm";
+import ResetPasswordEmailForm from "@/components/ResetPasswordEmailForm";
 
-
-export default function RequestPasswordReset() {
+const RequestPasswordReset = () => {
   return (
     <div>
-
-        <EmailForm />
+      <ResetPasswordEmailForm />
     </div>
-  )
-}
+  );
+};
+
+export default RequestPasswordReset;
