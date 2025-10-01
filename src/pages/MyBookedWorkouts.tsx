@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "@/components/Spinner/Spinner";
 import WorkoutItem from "@/components/WorkoutItem";
-import type { WorkoutResponseModel } from "@/types/workout";
 import { toast } from "sonner";
 
-
-
-type Booking = {
-  workoutIdentifier: string;
+type BookingDetails = {
+  title: string;
+  location: string;
+  startTime: string;
+  instructor: string;
 };
 
 export default function MyBookedWorkouts() {
@@ -17,15 +17,12 @@ export default function MyBookedWorkouts() {
   //Local state for loading, errors and fetched data
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [workouts, setWorkouts] = useState<WorkoutResponseModel[]>([]);
+  const [bookings, setBookings] = useState<BookingDetails[]>([]);
 
   useEffect(() => {
 
-    // Get user email from sessionStorage
     const email = sessionStorage.getItem("email");
 
-    // Redirected to login if no email found
     if (!email) {
       navigate("/signin");
       return;
@@ -37,32 +34,23 @@ export default function MyBookedWorkouts() {
         setError(null);
 
         // Get bookings
-        const bookingsRes: Booking[] = await fetch(
-          `/api/bookings/my?email=${email}`
+        //https://localhost:7175/api/Bookings/GetMyBookings/${email}
+        //
+        const bookingsRes: BookingDetails[] = await fetch(`https://gentle-sky-07e989710.2.azurestaticapps.net/api/Bookings/GetMyBookings/${email}`
         ).then((res) => {
           if (!res.ok) throw new Error("Failed to fetch bookings");
           return res.json();
         });
-
-        // Stop if no bookings found
+        console.log("Bookings from API:", bookingsRes);
         setBookings(bookingsRes);
 
 
         if (bookingsRes.length === 0) {
-          setWorkouts([]);
+          setBookings([]);
           return;
         }
 
-        // Get workouts linked to booking IDs
-        const workoutIds = bookingsRes.map((b) => b.workoutIdentifier);
-        const workoutsRes: WorkoutResponseModel[] = await fetch(
-          `/api/workout?ids=${workoutIds.join(",")}`
-        ).then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch workouts");
-          return res.json();
-        });
-
-        setWorkouts(workoutsRes);
+        
       } catch (err: any) {
         setError(err.message || "Something went wrong");
       } finally {
@@ -72,36 +60,57 @@ export default function MyBookedWorkouts() {
 
     fetchData();
   }, [navigate]);
-
-  // Show Loading spinner while getting data
-
   if (loading) return <Spinner />;
-
-  // Show error toast if request fails
  if (error) {
   toast.error(error); 
-  return null; 
+  return null;
 }
 
-    // Show empty state if no workouts booked
-  if (workouts.length === 0) {
-    return <p className="text-center mt-8">You have no booked workouts.</p>;
-  }
+
+
+
+
   // Render booked workouts
   return (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold mb-4">My booked workouts</h1>
-    <div className="grid gap-4">
-      {workouts.map((workout, index) => (
-        <WorkoutItem
-          key={workout.id}
-          workout={workout}
-          index={index}
-          onBook={() => {}} 
-        />
-      ))}
-    </div>
-  </div>
-);
+    <div className="overflow-x-auto rounded-2xl shadow-md">
+              <table className="min-w-full border-collapse">
+                <thead className="bg-gray-100 sticky top-0">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Title
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Location
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Start time
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Instructor
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                   {bookings.map((booking, index) => (
+                      <WorkoutItem
+                        key={index}
+                        workout={{
+                          id: index.toString(),
+                          title: booking.title,
+                          location: booking.location,
+                          startTime: booking.startTime,
+                          instructor: booking.instructor,
+                         }}
+                        index={index}
+                        onBook={() => {}}
+                      />
+                      ))}
+                </tbody>
+              </table>
+            </div>
+  )
 
 }
