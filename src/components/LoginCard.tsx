@@ -7,7 +7,7 @@ import "../css/sign-in-up-form.css";
 import Logo from "./Logo";
 import { useFetch, HttpError } from "@/hooks/useFetch";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Toast from "@/components/Toast/Toast";
 
 type SignInForm = {
@@ -49,33 +49,39 @@ const LoginCard: React.FC = () => {
           ? (res as { email?: string }).email
           : undefined;
 
-      if (!email) throw new Error("Unexpected sign-in response.");
+      if (!email) throw new Error("Oväntat inloggning fel. Försök igen.");
 
       sessionStorage.setItem("loggedInUserEmail", email);
-      toast.success("Signed in successfully!");
+      toast.success("Inloggning lyckades!");
       navigate("/workouts");
     } catch (err: unknown) {
       console.error("Sign-in error:", err);
 
       if (err instanceof HttpError) {
         if (err.status === 400 || err.status === 401) {
-          setError("password", { message: "Invalid email or password." });
-          toast.error("Invalid email or password.");
+          setError("password", {
+            message: "Ogiltig e-postadress eller lösenord.",
+          });
+          toast.error("Ogiltig e-postadress eller lösenord.");
           return;
         }
         if (err.status >= 500) {
-          toast.error("Server error (500). Please try again later.");
+          toast.error("Serverfel (500). Försök igen senare.");
           return;
         }
 
-        toast.error(`Request failed (${err.status}). Please try again later.`);
+        toast.error(
+          `Begäran misslyckades (${err.status}). Försök igen senare.`
+        );
         return;
       }
 
       const msg =
-        err instanceof Error && err.message && err.message !== "Failed to fetch"
+        err instanceof Error &&
+        err.message &&
+        err.message !== "Kunde inte hämta data."
           ? err.message
-          : "Network error. Please check your connection or try again later.";
+          : "Nätverksfel. Kontrollera din anslutning och försök igen.";
       toast.error(msg);
     }
   };
@@ -98,7 +104,7 @@ const LoginCard: React.FC = () => {
               CoreGymClub
             </h1>
             <p className="image-tagline font-bold text-2xl">
-              Transform Your Body. Elevate Your Life.
+              Din hälsa, ditt välmående, din styrka.
             </p>
           </div>
         </div>
@@ -107,8 +113,8 @@ const LoginCard: React.FC = () => {
         <div className="form-section">
           <div className="welcome-container">
             <Logo />
-            <h2>Welcome back</h2>
-            <p>Enter your credentials to access your account</p>
+            <h2>Välkommen tillbaka</h2>
+            <p>Fyll i dina uppgifter för att logga in.</p>
           </div>
 
           <form
@@ -118,29 +124,29 @@ const LoginCard: React.FC = () => {
             aria-busy={isSubmitting}
           >
             <span className="sr-only" role="status" aria-live="polite">
-              {isSubmitting ? "Authorizing..." : ""}
+              {isSubmitting ? "Verifierar..." : ""}
             </span>
 
             {/* Email */}
             <div className="form-group">
               <Label className="form-label text-sm font-bold" htmlFor="email">
-                Email
+                E-postadress
               </Label>
               <Input
                 id="email"
                 className="form-input"
-                placeholder="your@email.com"
+                placeholder="din@epost.se"
                 type="email"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
                 {...register("email", {
-                  required: "Email is required",
+                  required: "Du måste ange en e-postadress",
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Invalid email format",
+                    message: "Ogiltigt e-postformat",
                   },
                   validate: (v) =>
-                    v.trim().length > 0 || "Email cannot be empty",
+                    v.trim().length > 0 || "E-postadressen får inte vara tom",
                 })}
               />
               {errors.email && (
@@ -156,7 +162,7 @@ const LoginCard: React.FC = () => {
                 className="form-label text-sm font-bold"
                 htmlFor="password"
               >
-                Password
+                Lösenord
               </Label>
               <Input
                 id="password"
@@ -166,8 +172,8 @@ const LoginCard: React.FC = () => {
                 autoComplete="current-password"
                 aria-invalid={!!errors.password}
                 {...register("password", {
-                  required: "Password is required",
-                  minLength: { value: 8, message: "Min 8 characters" },
+                  required: "Lösenord krävs",
+                  minLength: { value: 8, message: "Minst 8 tecken." },
                 })}
               />
               {errors.password && (
@@ -177,16 +183,22 @@ const LoginCard: React.FC = () => {
               )}
             </div>
 
+            <p className="form-signin pt-4 pb-8">
+              Har du glömt ditt lösenord?{" "}
+              <NavLink to="/glomt-losenord">Klicka här</NavLink>
+            </p>
+
             <Button
               type="submit"
               className="form-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Authorizing..." : "Log in"}
+              {isSubmitting ? "Verifierar..." : "Logga in"}
             </Button>
 
             <p className="form-signin">
-              Don't have an account? <a href="/Register">Register</a>
+              Har du inget konto?{" "}
+              <NavLink to="/skapa-konto">Skapa konto</NavLink>
             </p>
           </form>
         </div>
