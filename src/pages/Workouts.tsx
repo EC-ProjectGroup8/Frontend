@@ -17,7 +17,7 @@ const WORKOUTS_ENDPOINT =
 const BOOKINGS_API_BASE =
   "https://bookingservice-api-e0e6hed3dca6egak.swedencentral-01.azurewebsites.net/api/Bookings";
 
-const WorkoutsPage: React.FC = () => {
+const Workouts: React.FC = () => {
   const userEmail =
     typeof window !== "undefined"
       ? sessionStorage.getItem("loggedInUserEmail")
@@ -130,4 +130,4 @@ const WorkoutsPage: React.FC = () => {
   );
 };
 
-export default WorkoutsPage;
+export default Workouts;
