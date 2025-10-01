@@ -9,17 +9,11 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/shadcn-io/spinner";
 
-
-
 const API_AUTH_ENDPOINT =
   "https://authservice8-fvgjaehwh5f8d9dq.swedencentral-01.azurewebsites.net/api/Auth/forgot-password";
 
-
-
-
 const EmailForm: React.FC = () => {
   const { post } = useFetch<unknown>(API_AUTH_ENDPOINT, { method: "POST" });
-
 
   const {
     register,
@@ -37,29 +31,26 @@ const EmailForm: React.FC = () => {
     },
   });
 
-
-
   const onSubmit = async (formData: RegistrationFormData) => {
     try {
       const payload = {
-
         Email: formData.Email.trim(),
-
       };
 
       await post(payload);
 
-      toast.success("Epost har skickats med dig återställniongslänk.");
+      toast.success("E-post har skickats till dig med en återställningslänk.");
       reset();
-
     } catch (err: unknown) {
-
-      if (err instanceof HttpError && err.status !== 200 && err.status !== 201) {
+      if (
+        err instanceof HttpError &&
+        err.status !== 200 &&
+        err.status !== 201
+      ) {
         setError("Email", { message: "Något gick fel, försök igen" });
         toast.error("Något gick fel, försök igen.");
         return;
       }
-
 
       const message =
         err instanceof Error ? err.message : "Något gick fel, försök igen.";
@@ -73,8 +64,6 @@ const EmailForm: React.FC = () => {
         {/* Toast */}
         <Toast />
 
-
-
         {/* FORM */}
         <form
           className="form"
@@ -82,24 +71,23 @@ const EmailForm: React.FC = () => {
           noValidate
           aria-busy={isSubmitting}
         >
-          <h2 className="form-title text-3xl font-bold">Password Reset Form</h2>
+          <h2 className="form-title text-3xl font-bold">
+            Återställ ditt lösenord
+          </h2>
           <p className="form-subtitle text-lg">
-            Enter your email to reset your password. You will receive a link to create a new password via email.
+            Ange din e-postadress för att återställa ditt lösenord. Du får en
+            länk via e-post för att skapa ett nytt lösenord.
           </p>
 
           {/* Screen-reader för submit-status */}
           <span className="sr-only" role="status" aria-live="polite">
-            {isSubmitting ? "Submitting your registration..." : ""}
+            {isSubmitting ? "Skickar återställnings länk..." : ""}
           </span>
-
-
-
-
 
           {/* Email */}
           <div className="form-group">
             <Label className="form-label text-sm font-bold" htmlFor="email">
-              Email Address
+              E-postadress
             </Label>
             <Input
               id="email"
@@ -109,13 +97,13 @@ const EmailForm: React.FC = () => {
               autoComplete="email"
               aria-invalid={!!errors.Email}
               {...register("Email", {
-                required: "Email is required",
+                required: "Du måste ange en e-postadress",
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Invalid email format",
+                  message: "Ogiltigt e-postformat",
                 },
                 validate: (value) =>
-                  value.trim().length > 0 || "Email cannot be empty",
+                  value.trim().length > 0 || "E-postadressen får inte vara tom",
               })}
             />
             {errors.Email && (
@@ -125,30 +113,21 @@ const EmailForm: React.FC = () => {
             )}
           </div>
 
-
-
           {/* Submit */}
           <Button type="submit" className="form-button" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Spinner />
-                Vänta...
+                Skickar återställningslänk....
               </>
             ) : (
               "Skicka Epost (Återställningslänk)"
             )}
           </Button>
-
-
         </form>
       </div>
     </div>
   );
 };
 
-
 export default EmailForm;
-
-
-
-

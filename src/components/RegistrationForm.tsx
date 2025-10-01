@@ -11,7 +11,7 @@ import Toast from "@/components/Toast/Toast";
 import type { RegistrationFormData } from "@/types/authTypes";
 import { useFetch, HttpError } from "@/hooks/useFetch";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const API_AUTH_ENDPOINT =
   "https://authservice8-fvgjaehwh5f8d9dq.swedencentral-01.azurewebsites.net/api/Auth/register";
@@ -274,7 +274,7 @@ const RegistrationForm: React.FC = () => {
 
           {/* Sign in */}
           <p className="form-signin">
-            Har du redan ett konto? <a href="/signin">Logga in</a>
+            Har du redan ett konto? <NavLink to="/logga-in">Logga in</NavLink>
           </p>
         </form>
       </div>

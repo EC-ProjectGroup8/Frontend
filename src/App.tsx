@@ -11,10 +11,9 @@ function App() {
     <Routes>
       <Route path="/" element={<BaseLayout />}>
         <Route index element={<UserLogin />} />
-        <Route path="/signin" element={<UserLogin />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="forgot-password" element={<RequestPasswordReset />} />
-
+        <Route path="/logga-in" element={<UserLogin />} />
+        <Route path="/skapa-konto" element={<Register />} />
+        <Route path="/glomt-losenord" element={<RequestPasswordReset />} />
       </Route>
 
       <Route path="/pass" element={<MemberLayout />}>
