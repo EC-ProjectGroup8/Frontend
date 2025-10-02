@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { formatDateTime } from "@/lib/utils/formatDateTimeUtil";
+// import { formatDateTime } from "@/lib/utils/formatDateTimeUtil";
 import type { WorkoutResponseModel } from "@/types/workout";
 
 type WorkoutItemProps = {
@@ -98,8 +98,32 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
     >
       <td className="px-6 py-4 text-gray-800">{workout.title}</td>
       <td className="px-6 py-4 text-gray-700">{workout.location}</td>
+      
+      {/* Anpassad datum- och tidsformattering för svenska (Sverige) */}
       <td className="px-6 py-4 text-gray-700">
-        {formatDateTime(workout.startTime)}
+        {(() => {
+          const d = new Date(workout.startTime);
+          const dateLabel = d.toLocaleDateString("sv-SE", {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+          const timeLabel = d.toLocaleTimeString("sv-SE", {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Europe/Stockholm',
+          });
+          const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+          return (
+            <div className="flex items-center justify-between gap-6">
+              <span className="text-gray-700">{cap(dateLabel)}</span>
+              <span className="font-semibold">{timeLabel}</span>
+            </div>
+          );
+        })()}        
       </td>
       <td className="px-6 py-4 text-gray-700">{workout.instructor}</td>
       <td className="px-6 py-4">

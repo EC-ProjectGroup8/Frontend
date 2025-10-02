@@ -5,12 +5,12 @@
    position: fixed;
    inset: 0;
    z-index: 1000;
-   display: block;
    background: rgba(0, 0, 0, 0.5);
    animation: overlay-fade var(--motion-duration-normal) ease-out;
+   display: flex;
+   align-items: flex-end;
 
    @media (min-width: 640px) {
-      display: flex;
       align-items: center;
       justify-content: center;
    }
@@ -28,34 +28,26 @@
 
 /* ================================
    Modal (container)
-   - Fullscreen på mobil, centrerad på ≥640px
 ================================ */
 .modal {
-   position: relative;
-   isolation: isolate;
-   inset: 0;
+   position: relative;      
    width: 100dvw;
-   height: 100dvh;
-   margin: 0;
-   max-width: none;
-   max-height: none;
-   border-radius: 0;
+   height: 100dvh;      
+   display: flex;
+   flex-direction: column;
+   border-radius: 0;   
    background: var(--clr-bg-card);
    color: var(--clr-text);
    box-shadow: none;
-   display: flex;
-   flex-direction: column;
    
    /* Entré-animering mobil: lätt fade + slide */
    opacity: 0;
-   transform: translateY(8px);
-   animation: modal-in-mobile var(--motion-duration-slow) cubic-bezier(.2,.7,.2,1) forwards;
-   will-change: transform, opacity;
+   transform: translateY(100%);
+   animation: modal-in-mobile var(--motion-duration-slow) cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
 
    @media (min-width: 640px) {
-      max-width: clamp(20rem, 90%, 40rem);
-      height: auto;
-      position: relative;
+      max-width: clamp(20rem, 90%, 34rem);      
+      height: auto; 
       max-height: 90dvh;
       border-radius: 0.75rem;
       box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
@@ -73,14 +65,12 @@
 .modal-header {
    position: sticky;
    top: 0;
-   z-index: 1;
    display: flex;
    align-items: center;
    justify-content: space-between;
    background: inherit;
    box-shadow: none;
-   padding: 0.875rem 1rem;
-   border-bottom: 1px solid var(--clr-border);
+   padding: 0.875rem 1rem;   
    border-radius: 0.75rem 0.75rem 0 0;   
 
    @media (min-width: 640px) {
@@ -103,35 +93,77 @@
 ================================ */
 .modal-body {
    flex: 1;
-   overflow: auto;
-   font-size: 1rem;
+   overflow-y: auto;
+   overflow-x: hidden;   
    padding: 0.875rem 1rem;
-
-   & .modal-content p {
-      font-weight: 500;
-      margin: 0 0 0.5rem 0;
-      line-height: 1.5;
-      color: var(--clr-text-title);
-   }
-
-   .modal-description {
-      margin-top: 2rem;
-      font-weight: 400;
-      color: var(--clr-text-body);
-      line-height: 1.5;
-      font-size: 0.875rem;
-      border-top: 1px solid var(--clr-border);
-
-      & p {
-         margin: 0.5rem 0 0 0;
-         font-weight: 400;
-         color: var(--clr-text-body);
-      }
-   }
+   overscroll-behavior: contain;
 
    @media (min-width: 640px) {
       overflow: auto;
       padding-inline: 1rem;
+   }
+}
+
+
+/* ================================
+   Content
+================================ */
+.modal-content {
+   display: flex;
+   flex-direction: column;
+   gap: 0.75rem;
+
+      & p {
+      margin: 0;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--clr-text-title);
+   }
+}
+
+.modal-row {
+   display: flex;
+   align-items: center;
+   gap: 0.5rem;
+   font-weight: 500;
+   line-height: 1.5;
+   color: var(--clr-text-title);
+
+   & .icon {      
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.125rem;
+      flex-shrink: 0;
+      font-size: 1rem;      
+      color: var(--clr-text-title);
+      opacity: 0.85;
+      transform: translateY(1px); /* finjustera vertikal position */
+   }
+
+   & .dot {
+      margin: 0 0.25rem;
+      opacity: 0.6;
+   }
+
+   & .time-strong {
+      font-weight: 600;
+   }
+}
+
+
+/* ================================
+   Description
+================================ */
+.modal-description {   
+   margin-top: 1rem;
+   
+   & p {
+      line-height: 1.5;
+      font-size: 0.875rem;
+      margin: 0.5rem 0 0 0;
+      font-weight: 400;
+      color: var(--clr-text-body);
    }
 }
 
@@ -219,24 +251,24 @@
 .modal-loading,
 .modal-empty,
 .modal-error {
-   padding: 1rem;
-}
-
-.modal-loading {
    display: grid;
    place-items: center;
-   min-height: 8rem;
+   min-height: 12rem;
+   padding: 2rem 1rem;
+}
+
+.modal-error {
+   color: var(--clr-error-500);
 }
 
 
 /* ================================
-   Animations + Reduced Motion
+   Animations
 ================================ */
 @keyframes overlay-fade {
    from {
       opacity: 0;
    }
-
    to {
       opacity: 1;
    }
@@ -245,9 +277,8 @@
 @keyframes modal-in-mobile {
    from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(100%);
    }
-
    to {
       opacity: 1;
       transform: translateY(0);
@@ -257,23 +288,25 @@
 @keyframes modal-in-desktop {
    from {
       opacity: 0;
-      transform: scale(.98);
+      transform: scale(0.96);
    }
-
    to {
       opacity: 1;
       transform: scale(1);
    }
 }
 
+/* ================================
+   Reduced Motion
+================================ */
 @media (prefers-reduced-motion: reduce) {
-
    .modal-overlay,
    .modal {
-      animation: none !important;
+      animation-duration: 0.01ms !important;
    }
 
-   .modal-actions .primary-button {
-      transition: none;
+   .modal-actions .primary-button,
+   .modal-close {
+      transition: none !important;
    }
 }
