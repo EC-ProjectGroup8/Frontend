@@ -60,7 +60,7 @@ const RegistrationForm: React.FC = () => {
 
       toast.success("Registreringen lyckades!");
       reset();
-      navigate("/signin");
+      navigate("/logga-in");
     } catch (err: unknown) {
       if (err instanceof HttpError && err.status === 409) {
         setError("Email", {
