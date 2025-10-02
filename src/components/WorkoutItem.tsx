@@ -7,7 +7,7 @@ type WorkoutItemProps = {
   index: number;
   isBooked: boolean;
   onBookingChanged: () => void; 
-  onViewDetails?: (workoutId: string) => void; // optional callback for viewing details
+  onViewDetails?: (workoutId: string) => void;
 };
 
 const BOOKINGS_API_BASE =
@@ -105,8 +105,29 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
       <td className="px-6 py-4">
         <button
           // Använder de dynamiskt valda klasserna
-          className={buttonClasses}
-          onClick={isBooked ? handleCancelWorkout : handleBookWorkout}
+          className={buttonClasses}      
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => { 
+            e.stopPropagation();
+            // Hanterar både bokning och avbokning
+            if (isBooked) {
+              handleCancelWorkout();
+            } else {
+              handleBookWorkout();
+            }
+          }}
+          // Gör knappen åtkomlig via tangentbordet
+          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              // Hanterar både bokning och avbokning
+              if (isBooked) {
+                handleCancelWorkout();
+              } else {
+                handleBookWorkout();
+              }
+            }
+          }}
           disabled={isLoading}
           // Översatta aria-labels
           aria-label={
