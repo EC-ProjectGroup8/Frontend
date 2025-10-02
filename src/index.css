@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* One File To Rule Them All */
 /* Import Custom CSS Code here from CSS folder */
@@ -11,5 +11,5 @@
 
 
 body {
-    font-family: var(--font-family-base);
+  font-family: var(--font-family-base);
 }

@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import CurrentPage from "./CurrentPage";
+import { NavLink } from "react-router-dom";
 import Logo from "./Logo";
 import LogOutButton from "./LogOutButton";
 
@@ -7,14 +6,22 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <Logo />
-      <CurrentPage />
-      <Link to="/workouts">
-        Workouts
-      </Link>
-      <Link to="/my-booked-workouts">
-        My Boookings
-      </Link>
 
+      <NavLink
+        to="/pass"
+        className={({ isActive }) => `navlink ${isActive ? "active" : ""}`}
+      >
+        <i className="fa-solid fa-dumbbell"></i>
+        <span>Pass</span>
+      </NavLink>
+
+      <NavLink
+        to="/mina-bokningar"
+        className={({ isActive }) => `navlink ${isActive ? "active" : ""}`}
+      >
+        <i className="fa-solid fa-calendar-days"></i>
+        <span>Mina bokningar </span>
+      </NavLink>
       <LogOutButton />
     </nav>
   );

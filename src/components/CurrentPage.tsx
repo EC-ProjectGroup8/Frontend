@@ -3,8 +3,12 @@ import { useLocation } from "react-router-dom";
 
 const formatTitle = (path: string) => {
   if (path === "/" || path === "") return "Home";
+
   const seg = path.split("/").filter(Boolean);
-  const last = seg[seg.length - 1] || "";
+  let last = seg[seg.length - 1] || "";
+
+  last = last.replace(/[-/]/g, " ");
+
   return last.charAt(0).toUpperCase() + last.slice(1);
 };
 

@@ -8,7 +8,6 @@ import RequestPasswordForm from "@/pages/RequestPasswordForm";
 import MyBookedWorkouts from "./pages/MyBookedWorkouts";
 import RequestPasswordReset from "./pages/RequestPasswordReset";
 
-
 function App() {
   return (
     <Routes>
@@ -24,14 +23,10 @@ function App() {
         <Route index element={<Pass />} />
       </Route>
 
-    <Route path="/my-booked-workouts" element={<MemberLayout />}>
-       <Route index element={<MyBookedWorkouts />} />
-    </Route>
-
-     
-
+      <Route path="/mina-bokningar" element={<MemberLayout />}>
+        <Route index element={<MyBookedWorkouts />} />
+      </Route>
     </Routes>
-
   );
 }
 

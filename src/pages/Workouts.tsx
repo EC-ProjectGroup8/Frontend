@@ -86,7 +86,6 @@ const Workouts: React.FC = () => {
           role="alert"
           className="bg-red-100 text-red-800 p-4 rounded-lg mb-4 shadow"
         >
-
           <p>{`Kunde inte ladda passen: ${error}`}</p>
 
           <button
@@ -110,16 +109,12 @@ const Workouts: React.FC = () => {
                   Plats
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Starttid
+                  Tid
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Instruktör
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Handling
-
-
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"></th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"></th>
               </tr>
             </thead>

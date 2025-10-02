@@ -20,10 +20,10 @@ export default function MyBookedWorkouts() {
   const [bookings, setBookings] = useState<BookingDetails[]>([]);
 
   useEffect(() => {
-    const email = sessionStorage.getItem("email");
+    const email = sessionStorage.getItem("loggedInUserEmail");
 
     if (!email) {
-      navigate("/signin");
+      navigate("/logga-in");
       return;
     }
 
@@ -36,9 +36,9 @@ export default function MyBookedWorkouts() {
         //https://localhost:7175/api/Bookings/GetMyBookings/${email}
         //
         const bookingsRes: BookingDetails[] = await fetch(
-          `https://gentle-sky-07e989710.2.azurestaticapps.net/api/Bookings/GetMyBookings/${email}`
+          `https://bookingservice-api-e0e6hed3dca6egak.swedencentral-01.azurewebsites.net/api/Bookings/GetMyBookings/${email}`
         ).then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch bookings");
+          if (!res.ok) throw new Error("Kunde inte hämta bokningar");
           return res.json();
         });
         console.log("Bookings from API:", bookingsRes);
@@ -52,7 +52,7 @@ export default function MyBookedWorkouts() {
         if (err instanceof Error) {
           setError(err.message);
         } else {
-          setError("An unknown error occurred");
+          setError("Ett okänt fel inträffade");
         }
       } finally {
         setLoading(false);
@@ -74,20 +74,18 @@ export default function MyBookedWorkouts() {
         <thead className="bg-gray-100 sticky top-0">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Title
+              Pass
             </th>
             <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Location
+              Plats
             </th>
             <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Start time
+              Tid
             </th>
             <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Instructor
+              Instruktör
             </th>
-            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Action
-            </th>
+            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"></th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
