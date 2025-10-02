@@ -7,7 +7,7 @@ import "../css/sign-in-up-form.css";
 import Logo from "./Logo";
 import { useFetch, HttpError } from "@/hooks/useFetch";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Toast from "@/components/Toast/Toast";
 
 type SignInForm = {
@@ -183,6 +183,11 @@ const LoginCard: React.FC = () => {
               )}
             </div>
 
+            <p className="form-signin pt-4 pb-8">
+              Har du glömt ditt lösenord?{" "}
+              <NavLink to="/glomt-losenord">Klicka här</NavLink>
+            </p>
+
             <Button
               type="submit"
               className="form-button"
@@ -192,7 +197,8 @@ const LoginCard: React.FC = () => {
             </Button>
 
             <p className="form-signin">
-              Har du inget konto? <a href="/skapa-konto">Skapa konto</a>
+              Har du inget konto?{" "}
+              <NavLink to="/skapa-konto">Skapa konto</NavLink>
             </p>
           </form>
         </div>

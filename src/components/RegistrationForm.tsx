@@ -11,7 +11,7 @@ import Toast from "@/components/Toast/Toast";
 import type { RegistrationFormData } from "@/types/authTypes";
 import { useFetch, HttpError } from "@/hooks/useFetch";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const API_AUTH_ENDPOINT =
   "https://authservice8-fvgjaehwh5f8d9dq.swedencentral-01.azurewebsites.net/api/Auth/register";
@@ -42,7 +42,9 @@ const RegistrationForm: React.FC = () => {
     },
   });
 
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  // Regex for password, synced with
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   const onSubmit = async (formData: RegistrationFormData) => {
     try {
@@ -222,7 +224,7 @@ const RegistrationForm: React.FC = () => {
                 minLength: { value: 8, message: "Minst 8 tecken." },
                 validate: (value) =>
                   passwordRegex.test(value) ||
-                  "Lösenordet måste innehålla minst en stor bokstav, en liten bokstav, en siffra och ett specialtecken.",
+                  "Minst en versal, gemen, siffra och specialtecken.",
               })}
             />
             {errors.Password && (
@@ -274,7 +276,7 @@ const RegistrationForm: React.FC = () => {
 
           {/* Sign in */}
           <p className="form-signin">
-            Har du redan ett konto? <a href="/logga-in">Logga in</a>
+            Har du redan ett konto? <NavLink to="/logga-in">Logga in</NavLink>
           </p>
         </form>
       </div>
