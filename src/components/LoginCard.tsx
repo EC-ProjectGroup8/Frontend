@@ -53,7 +53,7 @@ const LoginCard: React.FC = () => {
 
       sessionStorage.setItem("loggedInUserEmail", email);
       toast.success("Inloggning lyckades!");
-      navigate("/workouts");
+      navigate("/pass");
     } catch (err: unknown) {
       console.error("Sign-in error:", err);
 
