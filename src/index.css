@@ -4,8 +4,11 @@
 /* Import Custom CSS Code here from CSS folder */
 
 /* This is an Example */
-@import "./css/custom-css-here.css";
-@import "./css/variables.css";
+@import './css/custom-css-here.css';
+@import './css/variables.css';
+@import './css/modal.css';
+
+
 
 body {
   font-family: var(--font-family-base);

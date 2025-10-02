@@ -1,0 +1,279 @@
+/* ================================
+   Overlay
+================================ */
+.modal-overlay {
+   position: fixed;
+   inset: 0;
+   z-index: 1000;
+   display: block;
+   background: rgba(0, 0, 0, 0.5);
+   animation: overlay-fade var(--motion-duration-normal) ease-out;
+
+   @media (min-width: 640px) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+   }
+
+   & :focus {
+      outline: none;
+   }
+
+   & strong {
+      font-weight: 500;
+      color: var(--clr-text-title);
+   }
+}
+
+
+/* ================================
+   Modal (container)
+   - Fullscreen på mobil, centrerad på ≥640px
+================================ */
+.modal {
+   position: relative;
+   isolation: isolate;
+   inset: 0;
+   width: 100dvw;
+   height: 100dvh;
+   margin: 0;
+   max-width: none;
+   max-height: none;
+   border-radius: 0;
+   background: var(--clr-bg-card);
+   color: var(--clr-text);
+   box-shadow: none;
+   display: flex;
+   flex-direction: column;
+   
+   /* Entré-animering mobil: lätt fade + slide */
+   opacity: 0;
+   transform: translateY(8px);
+   animation: modal-in-mobile var(--motion-duration-slow) cubic-bezier(.2,.7,.2,1) forwards;
+   will-change: transform, opacity;
+
+   @media (min-width: 640px) {
+      max-width: clamp(20rem, 90%, 40rem);
+      height: auto;
+      position: relative;
+      max-height: 90dvh;
+      border-radius: 0.75rem;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
+
+      /* Entré-animering desktop: lätt scale + fade */
+      transform: scale(.98);
+      animation: modal-in-desktop var(--motion-duration-slow) cubic-bezier(.2,.7,.2,1) forwards;
+   }
+}
+
+
+/* ================================
+   Header
+================================ */
+.modal-header {
+   position: sticky;
+   top: 0;
+   z-index: 1;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   background: inherit;
+   box-shadow: none;
+   padding: 0.875rem 1rem;
+   border-bottom: 1px solid var(--clr-border);
+   border-radius: 0.75rem 0.75rem 0 0;   
+
+   @media (min-width: 640px) {
+      position: static;
+      padding-right: 3rem; /* plats för X-knappen */
+   }
+}
+
+.modal-title {
+   margin: 0;
+   font-size: 1.25rem;
+   line-height: 2rem;
+   font-weight: 700;
+   color: var(--clr-text-title);
+}
+
+
+/* ================================
+   Body
+================================ */
+.modal-body {
+   flex: 1;
+   overflow: auto;
+   font-size: 1rem;
+   padding: 0.875rem 1rem;
+
+   & .modal-content p {
+      font-weight: 500;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.5;
+      color: var(--clr-text-title);
+   }
+
+   .modal-description {
+      margin-top: 2rem;
+      font-weight: 400;
+      color: var(--clr-text-body);
+      line-height: 1.5;
+      font-size: 0.875rem;
+      border-top: 1px solid var(--clr-border);
+
+      & p {
+         margin: 0.5rem 0 0 0;
+         font-weight: 400;
+         color: var(--clr-text-body);
+      }
+   }
+
+   @media (min-width: 640px) {
+      overflow: auto;
+      padding-inline: 1rem;
+   }
+}
+
+
+/* ================================
+   Close (X)
+================================ */
+.modal-close {
+   position: absolute;
+   top: 0.5rem;
+   right: 0.5rem;
+   display: none;
+   background: none;
+   border: none;
+   cursor: pointer;
+   line-height: 1;
+   width: 2.5rem;
+   height: 2.5rem;
+   border-radius: 50%;
+   align-items: center;
+   justify-content: center;
+   z-index: 2;
+   transition: background var(--motion-duration-normal) ease;
+
+   &:hover {
+      background: rgba(0, 0, 0, 0.1);
+   }
+
+   &:focus-visible {
+      outline: 2px solid var(--clr-focus);
+      outline-offset: -0.25rem;
+   }
+   
+   @media (min-width: 640px) {
+      display: inline-flex;
+   }
+
+}
+
+
+/* ================================
+   Actions (mobil-sticky)
+================================ */
+.modal-actions {
+   position: sticky;
+   bottom: 0;
+   background: inherit;
+   padding-inline: 1rem;
+   padding-top: 2rem;
+
+   & .primary-button {
+      width: 100%;
+      min-height: 3rem;
+      font-size: 1rem;
+      outline: none;
+      transition:
+         background-color var(--motion-duration-fast) ease,
+         transform var(--motion-duration-fast) ease;
+
+      &:hover {
+         transform: translateY(-1px);
+         background-color: var(--clr-primary-400);
+      }
+
+      &:active {
+         transform: translateY(0);
+         background-color: var(--clr-primary-300);
+      }
+
+      &:focus-visible {
+         outline: 2px solid var(--clr-focus, #0ea5e9);
+         outline-offset: 2px;
+      }
+   }
+
+   @media (min-width: 640px) {
+      display: none;
+   }
+}
+
+
+/* ================================
+   States
+================================ */
+.modal-loading,
+.modal-empty,
+.modal-error {
+   padding: 1rem;
+}
+
+.modal-loading {
+   display: grid;
+   place-items: center;
+   min-height: 8rem;
+}
+
+
+/* ================================
+   Animations + Reduced Motion
+================================ */
+@keyframes overlay-fade {
+   from {
+      opacity: 0;
+   }
+
+   to {
+      opacity: 1;
+   }
+}
+
+@keyframes modal-in-mobile {
+   from {
+      opacity: 0;
+      transform: translateY(8px);
+   }
+
+   to {
+      opacity: 1;
+      transform: translateY(0);
+   }
+}
+
+@keyframes modal-in-desktop {
+   from {
+      opacity: 0;
+      transform: scale(.98);
+   }
+
+   to {
+      opacity: 1;
+      transform: scale(1);
+   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+   .modal-overlay,
+   .modal {
+      animation: none !important;
+   }
+
+   .modal-actions .primary-button {
+      transition: none;
+   }
+}

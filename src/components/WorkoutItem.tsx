@@ -6,7 +6,8 @@ type WorkoutItemProps = {
   workout: WorkoutResponseModel;
   index: number;
   isBooked: boolean;
-  onBookingChanged: () => void;
+  onBookingChanged: () => void; 
+  onViewDetails?: (workoutId: string) => void; // optional callback for viewing details
 };
 
 const BOOKINGS_API_BASE =
@@ -17,6 +18,7 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
   index,
   isBooked,
   onBookingChanged,
+  onViewDetails,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +92,9 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
       className={`${
         index % 2 === 0 ? "bg-white" : "bg-gray-50"
       } hover:bg-indigo-50 transition-colors`}
+      onClick={() => onViewDetails && onViewDetails(workout.id)}
+      style={{ cursor: onViewDetails ? "pointer" : undefined }} 
+      data-testid={`workout-row-${workout.id}`}
     >
       <td className="px-6 py-4 text-gray-800">{workout.title}</td>
       <td className="px-6 py-4 text-gray-700">{workout.location}</td>

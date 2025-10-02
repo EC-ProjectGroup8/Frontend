@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import Spinner from "@/components/Spinner/Spinner";
 import { useFetch } from "@/hooks/useFetch";
 import { WorkoutItem } from "@/components/WorkoutItem";
+import WorkoutDetailsModal from "@/components/WorkoutDetailsModal";
 import type { WorkoutResponseModel } from "@/types/workout";
 
 // ANTAGANDE: RawBookingModel måste matcha den råa C# WorkoutIdDto:n
@@ -29,6 +30,19 @@ const Workouts: React.FC = () => {
     error: workoutsError,
     refetch: refetchWorkouts,
   } = useFetch<WorkoutResponseModel[]>(WORKOUTS_ENDPOINT);
+
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const openDetails = (id: string) => {
+    setSelectedId(id);
+    setIsModalOpen(true);
+  };
+
+  const closeDetails = () => {
+    setIsModalOpen(false);
+    setSelectedId(null);
+  }; 
 
   const bookingUrl = userEmail
     ? `${BOOKINGS_API_BASE}/GetRawBookings/${userEmail}`
@@ -113,6 +127,7 @@ const Workouts: React.FC = () => {
                   // DENNA MATCHAR NU KORREKT: w.id (Crossfit ID) mot Set { Crossfit ID }
                   isBooked={bookedWorkoutIds.has(w.id)}
                   onBookingChanged={handleBookingChanged}
+                  onViewDetails={openDetails}
                 />
               ))}
             </tbody>
@@ -121,6 +136,13 @@ const Workouts: React.FC = () => {
       ) : !error ? (
         <p className="text-gray-600 text-center">Inga pass hittades.</p>
       ) : null}
+
+      {/* Details modal */}
+      <WorkoutDetailsModal
+        workoutId={selectedId}
+        isOpen={isModalOpen}
+        onClose={closeDetails}
+      />
     </div>
   );
 };
