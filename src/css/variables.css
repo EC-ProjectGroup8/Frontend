@@ -81,6 +81,8 @@
     --clr-error-text:  var(--clr-error-500);
     --ring-error: 0 0 0 3px color-mix(in srgb, var(--clr-error-500) 20%, transparent);
 
+    /* Focus */
+    --clr-focus: var(--clr-primary-400);
 
     /* Motion / Transitions */
     --motion-duration-fast:   120ms;

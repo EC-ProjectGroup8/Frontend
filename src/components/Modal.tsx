@@ -1,9 +1,11 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
+// CSS-selector för alla fokusbara element i modalen
 const FOCUSABLE_SELECTOR =
    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
+// Props för Modal-komponenten
 type ModalProps = {
    isOpen: boolean;
    onClose: () => void;
@@ -14,6 +16,7 @@ type ModalProps = {
    ariaDescribedById?: string;
 };
 
+// Modal-komponenten med fokusfångst, ESC-stängning och portal
 export function Modal({
    isOpen,
    onClose,
@@ -27,7 +30,7 @@ export function Modal({
    const headingRef = useRef<HTMLHeadingElement>(null);
    const modalId = useId();
 
-   // Disable scrolling on the body while the modal is open
+   // Inaktivera rullning på brödtexten medan modalfönstret är öppet
    useEffect(() => {
       if (!isOpen) return;
       const prev = document.body.style.overflow;
@@ -37,13 +40,12 @@ export function Modal({
       };
    }, [isOpen]);
 
-   // Handle focus management and keyboard interactions when the modal opens
+   // Hantera fokus och tangentbordsnavigering när modalen är öppen
    useEffect(() => {
-      if (!isOpen) return;
-      // Store the element focused before the modal opened to restore it on close
+      if (!isOpen) return;      
       const prev = document.activeElement as HTMLElement | null;
 
-      // Set focus to the first focusable element in the modal
+      // Funktion för att sätta initialt fokus på modalen
       const setInitialFocus = () => {
          if (headingRef.current) {
             headingRef.current.focus();
@@ -52,7 +54,7 @@ export function Modal({
          }
       };
 
-      // Listen for key presses: close on Escape, trap focus with Tab
+      // Funktion för att hantera tangenttryckningar
       const onKey = (e: KeyboardEvent) => {
          if (e.key === "Escape") {
             onClose();
@@ -62,7 +64,7 @@ export function Modal({
             const root = modalRef.current;
             if (!root) return;
 
-            // Get all focusable elements within the modal
+            // Hitta alla fokuserbara element i modalen
             const nodeList = root.querySelectorAll(FOCUSABLE_SELECTOR);
             const focusables: HTMLElement[] = Array.from(nodeList).filter(
                (el): el is HTMLElement =>
@@ -73,11 +75,11 @@ export function Modal({
             const first = focusables[0];
             const last = focusables[focusables.length - 1];
 
-            // Determine the currently focused element
+            // Identifiera det aktiva elementet
             const active = (document.activeElement as HTMLElement) || null;
 
             if (e.shiftKey) {
-               // If shifting back from the first element, focus the last
+               // Om du tabbar bakåt från det första elementet, fokusera det sista
                if (
                   active === first ||
                   !active ||
@@ -87,7 +89,7 @@ export function Modal({
                   e.preventDefault();
                }
             } else {
-               // If tabbing forward from the last element, focus the first
+               // Om du tabbar framåt från det sista elementet, fokusera det första
                if (active === last || !active || !focusables.includes(active)) {
                   first.focus();
                   e.preventDefault();
@@ -96,13 +98,13 @@ export function Modal({
          }
       };
 
-      // Add the keydown event listener to the window
+      // Lägg till event listener för tangenttryckningar
       window.addEventListener("keydown", onKey);
 
-      // Delay initial focus until after rendering
+      // Använd requestAnimationFrame för att säkerställa att fokus sätts efter renderingen
       const raf = requestAnimationFrame(setInitialFocus);
 
-      // Cleanup: remove event listener, cancel animation frame, restore previous focus
+      // Rensa upp event listener och återställ fokus när modalen stängs
       return () => {
          window.removeEventListener("keydown", onKey);
          cancelAnimationFrame(raf);
@@ -110,15 +112,17 @@ export function Modal({
       };
    }, [isOpen, onClose]);
 
-   // Return null if the modal is not open
+   // Om modalen inte är öppen, rendera ingenting
    if (!isOpen) return null;
 
-   // Skip rendering on the server-side
+   // Om vi inte är i en browser-miljö (t.ex. SSR), rendera ingenting
    if (typeof document === "undefined") return null;
 
-   // Locate the portal root element in the DOM
+   // Hitta portal-roten i DOM:en
    const portalRoot = document.getElementById("portal-root");
 
+   
+   // Modalens innehåll med overlay och fokusfångst
    const content = (
       <div
          className="modal-overlay"
@@ -141,12 +145,13 @@ export function Modal({
                type="button"
                aria-label="Close"
             >
+               {/* SVG för stängningsikonen */}
                <svg
                   viewBox="0 0 24 24"
                   width="28"
                   height="28"
                   aria-hidden="true"
-               >
+               >                  
                   <path
                      d="M18 6L6 18M6 6l12 12"
                      stroke="currentColor"
@@ -167,6 +172,6 @@ export function Modal({
       </div>
    );
 
-   // Use a portal if the root exists; otherwise, render inline
+   // Rendera modalen i portalen om den finns, annars direkt
    return portalRoot ? createPortal(content, portalRoot) : content;
 }
