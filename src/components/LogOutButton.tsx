@@ -5,7 +5,7 @@ const LogOutButton: React.FC = () => {
 
   const handleLogout = () => {
     sessionStorage.removeItem("loggedInUserEmail");
-    navigate("/signin");
+    navigate("/logga-in");
   };
 
   return (
