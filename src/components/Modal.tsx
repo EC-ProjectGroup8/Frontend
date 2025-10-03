@@ -1,11 +1,9 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
-// CSS-selector för alla fokusbara element i modalen
 const FOCUSABLE_SELECTOR =
    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
-// Props för Modal-komponenten
 type ModalProps = {
    isOpen: boolean;
    onClose: () => void;
@@ -16,7 +14,6 @@ type ModalProps = {
    ariaDescribedById?: string;
 };
 
-// Modal-komponenten med fokusfångst, ESC-stängning och portal
 export function Modal({
    isOpen,
    onClose,
@@ -27,115 +24,106 @@ export function Modal({
    ariaDescribedById,
 }: ModalProps) {
    const modalRef = useRef<HTMLDivElement>(null);
-   const headingRef = useRef<HTMLHeadingElement>(null);
-   const modalId = useId();
+   const previousFocusRef = useRef<HTMLElement | null>(null); // För att spara tidigare fokus
+   const modalId = useId(); // Unikt ID för modaltiteln
+   const headingId = `modal-${modalId}-heading`;
 
-   // Inaktivera rullning på brödtexten medan modalfönstret är öppet
+   // Hantera body scroll lock
    useEffect(() => {
       if (!isOpen) return;
-      const prev = document.body.style.overflow;
+
+      const previousOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
+
       return () => {
-         document.body.style.overflow = prev;
+         document.body.style.overflow = previousOverflow;
       };
    }, [isOpen]);
 
-   // Hantera fokus och tangentbordsnavigering när modalen är öppen
+   // Hantera fokus och tangentbordsnavigering
    useEffect(() => {
-      if (!isOpen) return;      
-      const prev = document.activeElement as HTMLElement | null;
+      if (!isOpen) return;
 
-      // Funktion för att sätta initialt fokus på modalen
-      const setInitialFocus = () => {
-         if (headingRef.current) {
-            headingRef.current.focus();
-         } else {
-            modalRef.current?.focus();
-         }
-      };
+      // Spara det tidigare fokuserade elementet
+      previousFocusRef.current = document.activeElement as HTMLElement;
 
-      // Funktion för att hantera tangenttryckningar
-      const onKey = (e: KeyboardEvent) => {
+      // Sätt fokus på modalen efter rendering
+      const timeoutId = setTimeout(() => {
+         modalRef.current?.focus();
+      }, 0);
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+         // Stäng modalen vid Escape
          if (e.key === "Escape") {
             onClose();
             return;
          }
+
+         // Tab-tangenten hanterar fokus-looping
          if (e.key === "Tab") {
-            const root = modalRef.current;
-            if (!root) return;
+            const modal = modalRef.current;
+            if (!modal) return;
 
-            // Hitta alla fokuserbara element i modalen
-            const nodeList = root.querySelectorAll(FOCUSABLE_SELECTOR);
-            const focusables: HTMLElement[] = Array.from(nodeList).filter(
-               (el): el is HTMLElement =>
-                  el instanceof HTMLElement && !el.hasAttribute("disabled")
-            );
-            if (focusables.length === 0) return;
+            const focusableElements = Array.from(
+               modal.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+            ).filter((el) => !el.hasAttribute("disabled"));
 
-            const first = focusables[0];
-            const last = focusables[focusables.length - 1];
+            if (focusableElements.length === 0) return;
 
-            // Identifiera det aktiva elementet
-            const active = (document.activeElement as HTMLElement) || null;
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+            const activeElement = document.activeElement as HTMLElement;
 
             if (e.shiftKey) {
-               // Om du tabbar bakåt från det första elementet, fokusera det sista
-               if (
-                  active === first ||
-                  !active ||
-                  !focusables.includes(active)
-               ) {
-                  last.focus();
+               // Shift+Tab: från första till sista
+               if (activeElement === firstElement) {
+                  lastElement.focus();
                   e.preventDefault();
                }
             } else {
-               // Om du tabbar framåt från det sista elementet, fokusera det första
-               if (active === last || !active || !focusables.includes(active)) {
-                  first.focus();
+               // Tab: från sista till första
+               if (activeElement === lastElement) {
+                  firstElement.focus();
                   e.preventDefault();
                }
-            }
+            }               
          }
       };
+      
+      document.addEventListener("keydown", handleKeyDown);
 
-      // Lägg till event listener för tangenttryckningar
-      window.addEventListener("keydown", onKey);
+      window.addEventListener("keydown", handleKeyDown);
 
-      // Använd requestAnimationFrame för att säkerställa att fokus sätts efter renderingen
-      const raf = requestAnimationFrame(setInitialFocus);
-
-      // Rensa upp event listener och återställ fokus när modalen stängs
       return () => {
-         window.removeEventListener("keydown", onKey);
-         cancelAnimationFrame(raf);
-         prev?.focus();
+         clearTimeout(timeoutId);
+         document.removeEventListener("keydown", handleKeyDown);
+         previousFocusRef.current?.focus(); // Återställ fokus till tidigare element
       };
    }, [isOpen, onClose]);
 
-   // Om modalen inte är öppen, rendera ingenting
    if (!isOpen) return null;
-
-   // Om vi inte är i en browser-miljö (t.ex. SSR), rendera ingenting
    if (typeof document === "undefined") return null;
 
-   // Hitta portal-roten i DOM:en
-   const portalRoot = document.getElementById("portal-root");
-
-   
-   // Modalens innehåll med overlay och fokusfångst
+   // Stäng modalen om användaren klickar på overlayen
+   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.target === e.currentTarget) {
+         onClose();
+      }
+   };
+      
    const content = (
       <div
          className="modal-overlay"
-         onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+         onClick={handleOverlayClick}
          role="presentation"
       >
          <div
             ref={modalRef}
-            className={`modal ${className || ""}`}
+            className={`modal ${className || ""}`.trim()}
             role="dialog"
             aria-modal="true"
-            aria-labelledby={heading ? modalId : undefined}
-            aria-label={!heading ? ariaLabel : undefined}
+            aria-labelledby={heading ? headingId : undefined}
+            aria-label={heading ? undefined : ariaLabel}
             aria-describedby={ariaDescribedById}
             tabIndex={-1}
          >
@@ -143,7 +131,7 @@ export function Modal({
                className="modal-close"
                onClick={onClose}
                type="button"
-               aria-label="Close"
+               aria-label="Stäng dialogruta"
             >
                {/* SVG för stängningsikonen */}
                <svg
@@ -151,6 +139,7 @@ export function Modal({
                   width="28"
                   height="28"
                   aria-hidden="true"
+                  focusable="false"
                >                  
                   <path
                      d="M18 6L6 18M6 6l12 12"
@@ -160,18 +149,20 @@ export function Modal({
                   />
                </svg>
             </button>
-            <header className="modal-header">
-               {heading && (
-                  <h2 id={modalId} className="modal-title" tabIndex={-1}>
+
+            {heading && (
+               <header className="modal-header">
+                  <h2 id={headingId} className="modal-title">
                      {heading}
                   </h2>
-               )}
             </header>
+            )}
+            
             <div className="modal-body">{children}</div>
          </div>
       </div>
    );
 
-   // Rendera modalen i portalen om den finns, annars direkt
+   const portalRoot = document.getElementById("portal-root");
    return portalRoot ? createPortal(content, portalRoot) : content;
 }

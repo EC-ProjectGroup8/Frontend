@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { formatDateTime } from "@/lib/utils/formatDateTimeUtil";
+// import { formatDateTime } from "@/lib/utils/formatDateTimeUtil";
 import type { WorkoutResponseModel } from "@/types/workout";
 
 type WorkoutItemProps = {
@@ -7,7 +7,7 @@ type WorkoutItemProps = {
   index: number;
   isBooked: boolean;
   onBookingChanged: () => void; 
-  onViewDetails?: (workoutId: string) => void; // optional callback for viewing details
+  onViewDetails?: (workoutId: string) => void;
 };
 
 const BOOKINGS_API_BASE =
@@ -98,15 +98,60 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
     >
       <td className="px-6 py-4 text-gray-800">{workout.title}</td>
       <td className="px-6 py-4 text-gray-700">{workout.location}</td>
+      
+      {/* Anpassad datum- och tidsformattering för svenska (Sverige) */}
       <td className="px-6 py-4 text-gray-700">
-        {formatDateTime(workout.startTime)}
+        {(() => {
+          const d = new Date(workout.startTime);
+          const dateLabel = d.toLocaleDateString("sv-SE", {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+          const timeLabel = d.toLocaleTimeString("sv-SE", {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Europe/Stockholm',
+          });
+          const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+          return (
+            <div className="flex items-center justify-between gap-6">
+              <span className="text-gray-700">{cap(dateLabel)}</span>
+              <span className="font-semibold">{timeLabel}</span>
+            </div>
+          );
+        })()}        
       </td>
       <td className="px-6 py-4 text-gray-700">{workout.instructor}</td>
       <td className="px-6 py-4">
         <button
           // Använder de dynamiskt valda klasserna
-          className={buttonClasses}
-          onClick={isBooked ? handleCancelWorkout : handleBookWorkout}
+          className={buttonClasses}      
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => { 
+            e.stopPropagation();
+            // Hanterar både bokning och avbokning
+            if (isBooked) {
+              handleCancelWorkout();
+            } else {
+              handleBookWorkout();
+            }
+          }}
+          // Gör knappen åtkomlig via tangentbordet
+          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              // Hanterar både bokning och avbokning
+              if (isBooked) {
+                handleCancelWorkout();
+              } else {
+                handleBookWorkout();
+              }
+            }
+          }}
           disabled={isLoading}
           // Översatta aria-labels
           aria-label={

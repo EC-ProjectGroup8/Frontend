@@ -68,14 +68,17 @@ const Workouts: React.FC = () => {
     refetchMyBookings();
   };
 
-  const isLoading = workoutsLoading || bookingsLoading;
+  // Tidigare: workoutsLoading || bookingsLoading -> gav ett kort "flicker" (listan blinkade vid refetch av bokningar). Nu visar vi spinner bara vid initial laddning.
+  const isInitialLoading =
+    workoutsLoading || (bookingsLoading && !myBookings);
   const error = workoutsError || bookingsError;
   const refetch = () => {
     refetchWorkouts();
     if (userEmail) refetchMyBookings();
   };
 
-  if (isLoading) return <Spinner />;
+  // Om initial laddning pågår, visa spinner
+  if (isInitialLoading) return <Spinner />;  
 
   const workouts = Array.isArray(allWorkouts) ? allWorkouts : [];
 
