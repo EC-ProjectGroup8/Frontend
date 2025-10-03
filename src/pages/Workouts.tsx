@@ -5,11 +5,9 @@ import { WorkoutItem } from "@/components/WorkoutItem";
 import WorkoutDetailsModal from "@/components/WorkoutDetailsModal";
 import type { WorkoutResponseModel } from "@/types/workout";
 
-// ANTAGANDE: RawBookingModel måste matcha den råa C# WorkoutIdDto:n
 interface RawBookingModel {
   id: number;
   userEmail: string;
-  // Det här fältet kommer från C# som 'WorkoutIdentifier', men JSON heter 'workoutIdentifier'
   workoutIdentifier: string;
 }
 
@@ -42,13 +40,12 @@ const Workouts: React.FC = () => {
   const closeDetails = () => {
     setIsModalOpen(false);
     setSelectedId(null);
-  }; 
+  };
 
   const bookingUrl = userEmail
     ? `${BOOKINGS_API_BASE}/GetRawBookings/${userEmail}`
     : null;
 
-  // FIX: Återinför 'as unknown as string' för att kringgå TS-reglerna
   const {
     data: myBookings,
     loading: bookingsLoading,
@@ -59,8 +56,6 @@ const Workouts: React.FC = () => {
   const bookedWorkoutIds = useMemo(() => {
     if (!myBookings) return new Set<string>();
 
-    // SLUTGILTIG FIX: Använder det faktiska JSON-fältnamnet (camelCase)
-    // om din typdefinition (RawBookingModel) använder camelCase, annars b.workoutIdentifier
     return new Set(myBookings.map((b) => b.workoutIdentifier));
   }, [myBookings]);
 
@@ -68,17 +63,14 @@ const Workouts: React.FC = () => {
     refetchMyBookings();
   };
 
-  // Tidigare: workoutsLoading || bookingsLoading -> gav ett kort "flicker" (listan blinkade vid refetch av bokningar). Nu visar vi spinner bara vid initial laddning.
-  const isInitialLoading =
-    workoutsLoading || (bookingsLoading && !myBookings);
+  const isInitialLoading = workoutsLoading || (bookingsLoading && !myBookings);
   const error = workoutsError || bookingsError;
   const refetch = () => {
     refetchWorkouts();
     if (userEmail) refetchMyBookings();
   };
 
-  // Om initial laddning pågår, visa spinner
-  if (isInitialLoading) return <Spinner />;  
+  if (isInitialLoading) return <Spinner />;
 
   const workouts = Array.isArray(allWorkouts) ? allWorkouts : [];
 
@@ -127,7 +119,6 @@ const Workouts: React.FC = () => {
                   key={w.id}
                   workout={w}
                   index={i}
-                  // DENNA MATCHAR NU KORREKT: w.id (Crossfit ID) mot Set { Crossfit ID }
                   isBooked={bookedWorkoutIds.has(w.id)}
                   onBookingChanged={handleBookingChanged}
                   onViewDetails={openDetails}
@@ -140,7 +131,6 @@ const Workouts: React.FC = () => {
         <p className="text-gray-600 text-center">Inga pass hittades.</p>
       ) : null}
 
-      {/* Details modal */}
       <WorkoutDetailsModal
         workoutId={selectedId}
         isOpen={isModalOpen}
