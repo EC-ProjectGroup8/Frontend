@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-// import { formatDateTime } from "@/lib/utils/formatDateTimeUtil";
 import type { WorkoutResponseModel } from "@/types/workout";
+import { toast } from "sonner";
 
 type WorkoutItemProps = {
   workout: WorkoutResponseModel;
   index: number;
   isBooked: boolean;
-  onBookingChanged: () => void; 
+  onBookingChanged?: () => void;
   onViewDetails?: (workoutId: string) => void;
+  onCancel?: () => void;
 };
 
 const BOOKINGS_API_BASE =
@@ -19,18 +20,19 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
   isBooked,
   onBookingChanged,
   onViewDetails,
+  onCancel,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [inlineError, setInlineError] = useState<string | null>(null);
 
   const handleBookWorkout = async () => {
     const userEmail = sessionStorage.getItem("loggedInUserEmail");
     if (!userEmail) {
-      setError("Du måste vara inloggad för att kunna boka ett pass.");
+      setInlineError("Du måste vara inloggad för att kunna boka ett pass.");
       return;
     }
     setIsLoading(true);
-    setError(null);
+    setInlineError(null);
     try {
       const response = await fetch(BOOKINGS_API_BASE, {
         method: "POST",
@@ -43,23 +45,23 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
       if (!response.ok) {
         throw new Error("Kunde inte boka passet. Försök igen.");
       }
-      onBookingChanged();
+      onBookingChanged?.();
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError("Ett oväntat fel inträffade.");
+      if (err instanceof Error) setInlineError(err.message);
+      else setInlineError("Ett oväntat fel inträffade.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCancelWorkout = async () => {
+  const internalCancel = async () => {
     const userEmail = sessionStorage.getItem("loggedInUserEmail");
     if (!userEmail) {
-      setError("Kunde inte hitta användarinformation för avbokning.");
+      setInlineError("Kunde inte hitta användarinformation för avbokning.");
       return;
     }
     setIsLoading(true);
-    setError(null);
+    setInlineError(null);
     try {
       const response = await fetch(
         `${BOOKINGS_API_BASE}/${userEmail}/${workout.id}`,
@@ -67,25 +69,35 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
       );
 
       if (!response.ok) {
+        toast.error("Det gick inte att avboka. Försök igen.");
         throw new Error("Kunde inte avboka passet. Försök igen.");
       }
-      onBookingChanged();
+
+      toast.success("Avbokning lyckades!");
+      onBookingChanged?.();
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError("Ett oväntat fel inträffade.");
+      if (err instanceof Error) setInlineError(err.message);
+      else setInlineError("Ett oväntat fel inträffade.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Definierar bas-klasserna för knappen
+  const handleCancelWorkout = async () => {
+    if (onCancel) {
+      onCancel();
+      return;
+    }
+
+    await internalCancel();
+  };
+
   const baseButtonClasses =
     "px-4 py-2 text-sm font-semibold rounded-lg shadow-md transition-colors whitespace-nowrap";
 
-  // Hanterar dynamiska klasser och färger
   const buttonClasses = isBooked
-    ? `${baseButtonClasses} bg-red-600 text-white hover:bg-red-700` // RÖD FÖR AVBOKNING
-    : `${baseButtonClasses} bg-teal-600 text-white hover:bg-teal-700`; // TURKOS/PRIMÄR FÖR BOKNING
+    ? `${baseButtonClasses} bg-red-600 text-white hover:bg-red-700`
+    : `${baseButtonClasses} bg-teal-600 text-white hover:bg-teal-700`;
 
   return (
     <tr
@@ -93,27 +105,27 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
         index % 2 === 0 ? "bg-white" : "bg-gray-50"
       } hover:bg-indigo-50 transition-colors`}
       onClick={() => onViewDetails && onViewDetails(workout.id)}
-      style={{ cursor: onViewDetails ? "pointer" : undefined }} 
+      style={{ cursor: onViewDetails ? "pointer" : undefined }}
       data-testid={`workout-row-${workout.id}`}
     >
       <td className="px-6 py-4 text-gray-800">{workout.title}</td>
       <td className="px-6 py-4 text-gray-700">{workout.location}</td>
-      
-      {/* Anpassad datum- och tidsformattering för svenska (Sverige) */}
+
+      {/* Datum + tid i sv-SE */}
       <td className="px-6 py-4 text-gray-700">
         {(() => {
           const d = new Date(workout.startTime);
           const dateLabel = d.toLocaleDateString("sv-SE", {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
           });
           const timeLabel = d.toLocaleTimeString("sv-SE", {
-            hour: '2-digit',
-            minute: '2-digit',
+            hour: "2-digit",
+            minute: "2-digit",
             hour12: false,
-            timeZone: 'Europe/Stockholm',
+            timeZone: "Europe/Stockholm",
           });
           const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -123,28 +135,26 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
               <span className="font-semibold">{timeLabel}</span>
             </div>
           );
-        })()}        
+        })()}
       </td>
+
       <td className="px-6 py-4 text-gray-700">{workout.instructor}</td>
+
       <td className="px-6 py-4">
         <button
-          // Använder de dynamiskt valda klasserna
-          className={buttonClasses}      
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => { 
+          className={buttonClasses}
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
-            // Hanterar både bokning och avbokning
             if (isBooked) {
               handleCancelWorkout();
             } else {
               handleBookWorkout();
             }
           }}
-          // Gör knappen åtkomlig via tangentbordet
           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              // Hanterar både bokning och avbokning
               if (isBooked) {
                 handleCancelWorkout();
               } else {
@@ -153,7 +163,6 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
             }
           }}
           disabled={isLoading}
-          // Översatta aria-labels
           aria-label={
             isBooked
               ? `Avboka passet ${workout.title}`
@@ -168,7 +177,10 @@ const WorkoutItemComponent: React.FC<WorkoutItemProps> = ({
             ? "Avboka"
             : "Boka"}
         </button>
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+
+        {inlineError && (
+          <p className="text-red-500 text-xs mt-1">{inlineError}</p>
+        )}
       </td>
     </tr>
   );
